@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @OpenAPIDefinition(info = @Info(title = "MnBMilk API", version = "1.0", description = "Information"))
 @SecurityScheme(name = "api", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 @EnableScheduling
-public class MotherAndBabyMilkApplication {
+public class    MotherAndBabyMilkApplication {
 
     public static void main(String[] args)
     {

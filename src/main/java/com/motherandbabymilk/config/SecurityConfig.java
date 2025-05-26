@@ -1,6 +1,5 @@
 package com.motherandbabymilk.config;
 
-
 import com.motherandbabymilk.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,17 +22,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
-@EnableGlobalMethodSecurity(
-        prePostEnabled = true
-)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     @Autowired
     UserService userService;
     @Autowired
     Filter filter;
-
-    public SecurityConfig() {
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -53,13 +46,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return (SecurityFilterChain)http.cors((cors) -> {
-            cors.configurationSource(this.corsConfigurationSource());
-        }).csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests((req) -> {
-            ((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)req.requestMatchers(new String[]{"/**"})).permitAll().anyRequest()).authenticated();
-        }).userDetailsService(this.userService).sessionManagement((session) -> {
-            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        }).addFilterBefore(this.filter, UsernamePasswordAuthenticationFilter.class).build();
+        return http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers("/api/login", "/api/register", "/api/forgot-password",
+                                "/api/products", "/api/products/**", "/swagger-ui/**", "/v3/api-docs/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .userDetailsService(userService)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean
