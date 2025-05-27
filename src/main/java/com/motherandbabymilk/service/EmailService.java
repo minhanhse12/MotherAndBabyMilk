@@ -27,7 +27,7 @@ public class EmailService {
             if ("registration".equals(emailType)) {
                 context.setVariable("title", "Welcome!" + emailDetail.getReceiver().getUsername());
                 context.setVariable("mainMessage", "Thank you for joining us. We're excited to have you on board!");
-                context.setVariable("actionUrl", "http://localhost:5173/");
+                context.setVariable("actionUrl", "https://9012-118-69-70-166.ngrok-free.app");
                 context.setVariable("actionText", "Get Started");
                 template = this.templateEngine.process("email-template", context);
             } else {
@@ -39,7 +39,7 @@ public class EmailService {
                 context.setVariable("customerName", emailDetail.getReceiver().getUsername());
                 context.setVariable("mainMessage", "Your order has been cancelled. ");
                 context.setVariable("reason", emailDetail.getReason());
-                context.setVariable("actionUrl", "http://localhost:5173/browser-track");
+                context.setVariable("actionUrl", "https://9012-118-69-70-166.ngrok-free.app");
                 context.setVariable("actionText", "View Orders");
                 context.setVariable("companyName", "KoiDelivery");
                 context.setVariable("companyAddress", "566 Vo Van Ngan Street, HCM City, VietNam");

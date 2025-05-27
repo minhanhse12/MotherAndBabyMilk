@@ -73,8 +73,8 @@ public class UserService implements UserDetailsService {
 
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(newUser);
-            emailDetail.setSubject("Welcome to Koi Delivery");
-            emailDetail.setLink("http://localhost:51");
+            emailDetail.setSubject("Welcome to MnBMilk");
+            emailDetail.setLink(" https://9012-118-69-70-166.ngrok-free.app");
             this.emailService.sendEmail(emailDetail, "registration");
             return (RegistrationResponse)this.modelMapper.map(newUser, RegistrationResponse.class);
 
@@ -107,7 +107,7 @@ public class UserService implements UserDetailsService {
         if (currentUser == null) {
             throw new EntityNotFoundException("Customer not found!");
         } else {
-            currentUser.setFullname(updateProfile.getFullName());
+            currentUser.setFullName(updateProfile.getFullName());
             currentUser.setPhone(updateProfile.getPhone());
             currentUser.setAddress(updateProfile.getAddress());
             Users updatedUser = this.userRepository.save(currentUser);

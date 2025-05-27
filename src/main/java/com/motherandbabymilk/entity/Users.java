@@ -31,7 +31,7 @@ public class Users implements UserDetails {
     @Size(min = 6, message = "Password must be at least 6 characters!")
     private String password;
 
-    private String fullname;
+    private String fullName;
 
     @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})", message = "Invalid phone!")
     private String phone;
@@ -53,5 +53,4 @@ public class Users implements UserDetails {
         }
         return authorities;
     }
-
 }

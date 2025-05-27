@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class UpdateResponse {
     private int id;
-    private String email;
+    private String username;
     private String phone;
     private String address;
 }

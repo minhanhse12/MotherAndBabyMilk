@@ -13,11 +13,15 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin(
+        origins = {"http://localhost:5173"}
+)
 @RequestMapping("/api")
 @SecurityRequirement(name = "api")
 public class UserController {
@@ -31,7 +35,6 @@ public class UserController {
     public ResponseEntity<RegistrationResponse> register(@Valid @RequestBody Registration register) {
         RegistrationResponse newUser = userService.register(register);
         return ResponseEntity.ok(newUser);
-
     }
 
 
@@ -39,7 +42,7 @@ public class UserController {
     public ResponseEntity<UserResponse> login(@Valid @RequestBody Login login) {
         UserResponse checkuser = userService.login(login);
         return ResponseEntity.ok(checkuser);
-    }
+        }
 
     @PostMapping("/logout")
     public String logout() {
@@ -58,6 +61,7 @@ public class UserController {
         return ResponseEntity.ok(update);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/user/{userId}")
     public ResponseEntity deleteUser(@PathVariable("userId") int userId) {
         Users deletedUsers = userService.delete(userId);
