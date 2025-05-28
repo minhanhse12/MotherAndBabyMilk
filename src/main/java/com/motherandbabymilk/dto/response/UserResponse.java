@@ -14,10 +14,10 @@ public class UserResponse {
     private String phone;
 
     @Schema(description = "User's full name", example = "fullname")
-    private String fullname;
+    private String fullName;
 
-    @Schema(description = "User's role", example = "fole")
-    private String role;
+    @Schema(description = "User's role", example = "role")
+    private String roles;
 
     @Schema(description = "User's address", example = "address")
     private String address;
