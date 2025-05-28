@@ -12,7 +12,16 @@ public class UserResponse {
     private String email;
     @Schema(description = "User's email address", example = "phoneNumber")
     private String phone;
+
+    @Schema(description = "User's full name", example = "fullname")
+    private String fullname;
+
+    @Schema(description = "User's role", example = "fole")
+    private String role;
+
+    @Schema(description = "User's address", example = "address")
+    private String address;
+
     @Schema(description = "User's token", example = "token")
     String token;
 }
-
