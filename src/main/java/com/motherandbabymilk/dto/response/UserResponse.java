@@ -11,7 +11,7 @@ public class UserResponse {
     private String username;
     @Schema(description = "User's role", example = "role")
     private Roles roles;
-    @Schema(description = "User's fullName", example = "phoneNumber")
+    @Schema(description = "User's fullName", example = "user's fullName")
     private String fullName;
     @Schema(description = "User's phone", example = "phoneNumber")
     private String phone;
