@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -71,12 +72,18 @@ public class UserService implements UserDetailsService {
 
             Users newUser = this.userRepository.save(user);
 
+            // Gửi email chào mừng
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(newUser);
             emailDetail.setSubject("Welcome to MnBMilk");
-            emailDetail.setLink(" https://9012-118-69-70-166.ngrok-free.app");
+            emailDetail.setLink("https://9012-118-69-70-166.ngrok-free.app");
             this.emailService.sendEmail(emailDetail, "registration");
-            return (RegistrationResponse)this.modelMapper.map(newUser, RegistrationResponse.class);
+
+            String token = this.tokenService.generateToken(newUser);
+            RegistrationResponse response = this.modelMapper.map(newUser, RegistrationResponse.class);
+            response.setToken(token);
+
+            return response;
 
         } catch (Exception e) {
             throw new RuntimeException("Error creating user: " + e.getMessage());
@@ -87,7 +94,7 @@ public class UserService implements UserDetailsService {
         try {
             Authentication authentication = this.authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginDto.getUsername(), // sử dụng username (định dạng email)
+                            loginDto.getUsername(),
                             loginDto.getPassword()
                     )
             );
@@ -116,12 +123,12 @@ public class UserService implements UserDetailsService {
     }
 
     public Users delete(int id) {
-        Users user = this.getStudentById(id);
+        Users user = this.getUserById(id);
         user.setStatus(false);
         return this.userRepository.save(user);
     }
 
-    public Users getStudentById(int id) {
+    public Users getUserById(int id) {
         Users user = this.userRepository.findUsersById(id);
         if (user == null) {
             throw new EntityNotFoundException("User not found!");
@@ -129,6 +136,21 @@ public class UserService implements UserDetailsService {
             return user;
         }
     }
+
+    public List getAllUser() {
+        List<Users> userResponse = this.userRepository.findUsersByStatusTrue();
+        return userResponse.stream().map((user) -> {
+            UserResponse users = new UserResponse();
+            users.setId(user.getId());
+            users.setUsername(user.getUsername());
+            users.setRoles(user.getRoles());
+            users.setFullName(user.getFullName());
+            users.setPhone(user.getPhone());
+            users.setAddress(user.getAddress());
+            return users;
+        }).collect(Collectors.toList());
+    }
+
 
     public Users getCurrentAccount() {
         return (Users) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

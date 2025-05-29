@@ -50,10 +50,16 @@ public class UserController {
         return "Logged out successfully";
     }
 
-//    @GetMapping("/user")
-//    public List<Users> getAllUsers() {
-//        return userService.getAllUser();
-//    }
+    @GetMapping({"/currentUser/detail"})
+    public ResponseEntity<UpdateResponse> getCurrentUser() {
+        UpdateResponse userResponse = this.userService.getCurrentUserInfo();
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @GetMapping({"/user"})
+    public List getAllUsers() {
+        return this.userService.getAllUser();
+    }
 
     @PutMapping("/customer/{customerId}")
     public ResponseEntity<UpdateResponse> updateCustomer(@Valid @RequestBody UpdateProfile updateProfile) {

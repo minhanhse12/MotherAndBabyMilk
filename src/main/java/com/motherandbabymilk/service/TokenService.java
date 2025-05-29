@@ -28,13 +28,12 @@ public class TokenService {
     }
 
     public String generateToken(Users user) {
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .subject(user.getId() + "")
                 .issuedAt(new Date(System.currentTimeMillis())) //10:30
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSigninKey())
                 .compact();
-        return token;
     }
 
     public Users verifyToken(String token) {
