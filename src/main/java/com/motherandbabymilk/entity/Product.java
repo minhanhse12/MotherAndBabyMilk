@@ -31,7 +31,7 @@ public class Product {
     private int quantity;
 
     @Column(name = "status", nullable = false)
-    private boolean status;
+    private boolean status = true; // Thêm lại status
 
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete = false;

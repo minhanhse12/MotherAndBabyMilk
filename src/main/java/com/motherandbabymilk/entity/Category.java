@@ -14,6 +14,9 @@ public class Category {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
+    @Column(name = "status", nullable = false)
+    private boolean status = true; // Thêm lại status
+
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete = false;
 }
