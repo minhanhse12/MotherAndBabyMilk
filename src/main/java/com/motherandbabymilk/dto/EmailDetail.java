@@ -3,7 +3,7 @@ package com.motherandbabymilk.dto;
 
 import com.motherandbabymilk.entity.Users;
 import java.util.Date;
-import lombok.Generated;
+import lombok.*;
 
 public class EmailDetail {
     private Users receiver;
@@ -15,6 +15,10 @@ public class EmailDetail {
     @Generated
     public EmailDetail() {
     }
+
+    @Getter
+    @Setter
+    private String token;
 
     @Generated
     public Users getReceiver() {

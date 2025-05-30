@@ -17,38 +17,48 @@ public class EmailService {
     @Autowired
     JavaMailSender javaMailSender;
 
-    public EmailService() {
-    }
-
     public void sendEmail(EmailDetail emailDetail, String emailType) {
         try {
             Context context = new Context();
             String template = "";
-            if ("registration".equals(emailType)) {
-                context.setVariable("title", "Welcome!" + emailDetail.getReceiver().getUsername());
-                context.setVariable("mainMessage", "Thank you for joining us. We're excited to have you on board!");
-                context.setVariable("actionUrl", "https://9012-118-69-70-166.ngrok-free.app");
-                context.setVariable("actionText", "Get Started");
-                template = this.templateEngine.process("email-template", context);
-            } else {
-                if (!"orderCancellation".equals(emailType)) {
-                    throw new MessagingException("Invalid Email Type");
-                }
 
-                context.setVariable("title", "Order Cancellation Notification");
-                context.setVariable("customerName", emailDetail.getReceiver().getUsername());
-                context.setVariable("mainMessage", "Your order has been cancelled. ");
-                context.setVariable("reason", emailDetail.getReason());
-                context.setVariable("actionUrl", "https://9012-118-69-70-166.ngrok-free.app");
-                context.setVariable("actionText", "View Orders");
-                context.setVariable("companyName", "KoiDelivery");
-                context.setVariable("companyAddress", "566 Vo Van Ngan Street, HCM City, VietNam");
-                template = this.templateEngine.process("cancel-template", context);
+            switch (emailType) {
+                case "registration":
+                    context.setVariable("title", "Welcome! " + emailDetail.getReceiver().getUsername());
+                    context.setVariable("mainMessage", "Thank you for joining us. We're excited to have you on board!");
+                    context.setVariable("actionUrl", "https://644f-118-69-182-149.ngrok-free.app");
+                    context.setVariable("actionText", "Get Started");
+                    template = this.templateEngine.process("email-template", context);
+                    break;
+
+                case "orderCancellation":
+                    context.setVariable("title", "Order Cancellation Notification");
+                    context.setVariable("customerName", emailDetail.getReceiver().getUsername());
+                    context.setVariable("mainMessage", "Your order has been cancelled.");
+                    context.setVariable("reason", emailDetail.getReason());
+                    context.setVariable("actionUrl", "https://644f-118-69-182-149.ngrok-free.app");
+                    context.setVariable("actionText", "View Orders");
+                    context.setVariable("companyName", "MnBMilk");
+                    context.setVariable("companyAddress", "566 Vo Van Ngan Street, HCM City, VietNam");
+                    template = this.templateEngine.process("cancel-template", context);
+                    break;
+
+                case "resetPassword":
+                    context.setVariable("title", "Password Reset Request");
+                    context.setVariable("mainMessage", "We received a request to reset your password.");
+                    context.setVariable("actionUrl", "https://644f-118-69-182-149.ngrok-free.app/reset-password?token=" + emailDetail.getToken());
+                    context.setVariable("actionText", "Reset Password");
+                    context.setVariable("companyName", "MnBMilk");
+                    template = this.templateEngine.process("reset-password-template", context);
+                    break;
+
+                default:
+                    throw new MessagingException("Invalid Email Type");
             }
 
             MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
-            mimeMessageHelper.setFrom("koideliveryordering@gmail.com");
+            mimeMessageHelper.setFrom("minhanh0381672@gmail.com");
             mimeMessageHelper.setTo(emailDetail.getReceiver().getUsername());
             mimeMessageHelper.setText(template, true);
             mimeMessageHelper.setSubject(emailDetail.getSubject());
@@ -56,6 +66,6 @@ public class EmailService {
         } catch (MessagingException var7) {
             System.out.println("ERROR SENT MAIL!!");
         }
-
     }
+
 }

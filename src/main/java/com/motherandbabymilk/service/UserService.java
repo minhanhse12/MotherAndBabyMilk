@@ -8,9 +8,11 @@ import com.motherandbabymilk.dto.request.Login;
 import com.motherandbabymilk.dto.request.Registration;
 import com.motherandbabymilk.dto.response.RegistrationResponse;
 import com.motherandbabymilk.dto.response.UserResponse;
+import com.motherandbabymilk.entity.PasswordResetToken;
 import com.motherandbabymilk.entity.Roles;
 import com.motherandbabymilk.entity.Users;
 import com.motherandbabymilk.exception.DuplicateUserException;
+import com.motherandbabymilk.repository.TokenRepository;
 import com.motherandbabymilk.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +46,8 @@ public class UserService implements UserDetailsService {
     TokenService tokenService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private TokenRepository tokenRepository;
 
     public UserService() {
     }
@@ -156,17 +161,28 @@ public class UserService implements UserDetailsService {
         return (Users) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
-        Users users = this.userRepository.findUsersByUsername(forgotPasswordRequest.getUsername());
-        if (users == null) {
-            throw new EntityNotFoundException("User not found!");
-        } else {
-            EmailDetail emailDetail = new EmailDetail();
-            emailDetail.setReceiver(users);
-            emailDetail.setSubject("Reset your password");
-            emailDetail.setLink("https://www.google.com/" + this.tokenService.generateToken(users));
-            this.emailService.sendEmail(emailDetail, "registration");
+    public boolean updatePasswordByToken(String token, String newPassword) {
+        Optional<PasswordResetToken> tokenOpt = tokenRepository.findByToken(token);
+
+        if (tokenOpt.isEmpty()) {
+            return false;
         }
+
+        PasswordResetToken resetToken = tokenOpt.get();
+
+        if (resetToken.isExpired()) {
+            tokenRepository.delete(resetToken);
+            return false;
+        }
+
+        Users user = resetToken.getUser();
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        tokenRepository.delete(resetToken);
+
+        return true;
     }
 
     @Override
