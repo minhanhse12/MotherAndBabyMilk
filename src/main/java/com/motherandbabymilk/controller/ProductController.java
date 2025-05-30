@@ -22,7 +22,7 @@ public class ProductController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
-        ProductResponse response = productService.createProduct(request);
+        ProductResponse response = productService.createProduct(request)    ;
         return ResponseEntity.ok(response);
     }
 
