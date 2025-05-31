@@ -33,6 +33,9 @@ public class ProductRequest {
     @Min(value = 0, message = "Quantity must be non-negative!")
     private int quantity;
 
+    @Schema(description = "", example = "1")
+    private int id;
+
     @Schema(description = "Product status", example = "true")
     private boolean status;
 }

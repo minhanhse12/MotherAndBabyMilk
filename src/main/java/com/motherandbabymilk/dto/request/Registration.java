@@ -18,9 +18,6 @@ public class Registration {
     @Schema(description = "User's full name", example = "Nguyen Van A")
     private String fullName;
 
-    @Schema(description = "User's address", example = "Tan Phu, Ho Chi Minh")
-    private String address;
-
     @Schema(description = "User's phone number", example = "0912345678")
     private String phone;
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class ProductResponse {
+    @Schema(description = "Product ID", example = "1")
     private int id;
 
     @Schema(description = "Product name", example = "Similac Mom")
@@ -25,6 +26,9 @@ public class ProductResponse {
     @Schema(description = "Product quantity", example = "100")
     private int quantity;
 
-    @Schema(description = "Product status", example = "true")
+    @Schema(description = "Product status(true = is stock, false = out off stock)", example = "true")
     private boolean status;
+
+    @Schema(description = "Product is delete", example = "false")
+    private boolean isDelete;
 }

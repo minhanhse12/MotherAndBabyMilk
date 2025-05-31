@@ -1,38 +1,38 @@
 package com.motherandbabymilk.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-@Data
 @Entity
 @Table(name = "products")
+@Data
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NotBlank(message = "Name cannot be blank!")
-    @Size(max = 100, message = "Name must be less than 100 characters!")
-    @Column(unique = true)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @NotBlank(message = "Image URL cannot be blank!")
+    @Column(name = "image", nullable = false)
     private String image;
 
-    @Min(value = 0, message = "Price must be non-negative!")
+    @Column(name = "price", nullable = false)
     private double price;
 
-    @Size(max = 500, message = "Description must be less than 500 characters!")
+    @Column(name = "description")
     private String description;
 
-    @Min(value = 1, message = "Category ID must be positive!")
-    private int categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
-    @Min(value = 0, message = "Quantity must be non-negative!")
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    @Column(name = "status", nullable = false)
     private boolean status = true;
+
+    @Column(name = "is_delete", nullable = false)
+    private boolean isDelete = false;
 }
