@@ -57,7 +57,6 @@ public class UserService implements UserDetailsService {
         if (existedUser != null) {
             throw new DuplicateUserException("User with this username already exists");
         }
-
         try {
             Users user = this.modelMapper.map(register, Users.class);
 
@@ -143,7 +142,7 @@ public class UserService implements UserDetailsService {
     }
 
     public List getAllUser() {
-        List<Users> userResponse = this.userRepository.findUsersByStatusTrue();
+        List<Users> userResponse = this.userRepository.findAll();
         return userResponse.stream().map((user) -> {
             UserResponse users = new UserResponse();
             users.setId(user.getId());
@@ -152,9 +151,24 @@ public class UserService implements UserDetailsService {
             users.setFullName(user.getFullName());
             users.setPhone(user.getPhone());
             users.setAddress(user.getAddress());
+            users.setStatus(user.isStatus());
             return users;
         }).collect(Collectors.toList());
     }
+
+    public UpdateResponse updateUserByAdmin(int id, UpdateProfile updateProfile) {
+        Users user = this.userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found!"));
+
+        user.setFullName(updateProfile.getFullName());
+        user.setRoles(updateProfile.getRoles());
+        user.setPhone(updateProfile.getPhone());
+        user.setAddress(updateProfile.getAddress());
+        user.setStatus(updateProfile.isStatus());
+        Users updatedUser = this.userRepository.save(user);
+        return this.modelMapper.map(updatedUser, UpdateResponse.class);
+    }
+
 
 
     public Users getCurrentAccount() {

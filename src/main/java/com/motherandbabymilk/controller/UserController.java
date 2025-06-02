@@ -45,7 +45,6 @@ public class UserController {
         return ResponseEntity.ok(newUser);
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(@Valid @RequestBody Login login) {
         UserResponse checkuser = userService.login(login);

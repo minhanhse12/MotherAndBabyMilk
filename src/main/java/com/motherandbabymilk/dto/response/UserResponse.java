@@ -17,6 +17,8 @@ public class UserResponse {
     private String phone;
     @Schema(description = "User's address", example = "address")
     private String address;
+    @Schema(description = "User's status", example = "true")
+    private boolean status;
     @Schema(description = "User's token", example = "token")
     String token;
 }

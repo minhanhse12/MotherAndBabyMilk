@@ -26,7 +26,7 @@ public class EmailService {
                 case "registration":
                     context.setVariable("title", "Welcome! " + emailDetail.getReceiver().getUsername());
                     context.setVariable("mainMessage", "Thank you for joining us. We're excited to have you on board!");
-                    context.setVariable("actionUrl", "https://644f-118-69-182-149.ngrok-free.app");
+                    context.setVariable("actionUrl", "http://localhost:8080/");
                     context.setVariable("actionText", "Get Started");
                     template = this.templateEngine.process("email-template", context);
                     break;

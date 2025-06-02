@@ -16,8 +16,6 @@ public class RegistrationResponse {
     private String fullName;
     @Schema(description = "User's phone", example = "phoneNumber")
     private String phone;
-    @Schema(description = "User's address", example = "address")
-    private String address;
     @Schema(description = "User's token", example = "token")
     String token;
 }
