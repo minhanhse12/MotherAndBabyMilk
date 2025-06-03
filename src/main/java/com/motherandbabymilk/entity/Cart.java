@@ -20,7 +20,7 @@ public class Cart {
     private Double totalPrice;
 
     @Column(nullable = false)
-    private String status = "active"; // Ví dụ: active, ordered, abandoned
+    private String status = "active";
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

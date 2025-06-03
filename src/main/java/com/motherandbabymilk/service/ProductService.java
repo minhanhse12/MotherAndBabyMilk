@@ -2,14 +2,10 @@ package com.motherandbabymilk.service;
 
 import com.motherandbabymilk.dto.request.ProductRequest;
 import com.motherandbabymilk.dto.response.ProductResponse;
-import com.motherandbabymilk.dto.EmailDetail;
 import com.motherandbabymilk.entity.Product;
-import com.motherandbabymilk.entity.Users;
-import com.motherandbabymilk.entity.Roles;
 import com.motherandbabymilk.exception.DuplicateProductException;
 import com.motherandbabymilk.exception.EntityNotFoundException;
 import com.motherandbabymilk.repository.ProductRepository;
-import com.motherandbabymilk.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,10 +17,6 @@ import java.util.stream.Collectors;
 public class ProductService {
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private EmailService emailService;
     @Autowired
     private ModelMapper modelMapper;
 

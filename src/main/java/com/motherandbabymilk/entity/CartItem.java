@@ -35,8 +35,8 @@ public class CartItem {
     private java.time.LocalDateTime addedAt;
 
     @Column(nullable = false)
-    private boolean isSelect = true;  // Mặc định là được chọn
+    private boolean isSelect = true;
 
     @Column(nullable = false)
-    private boolean isDelete = false; // Mặc định là chưa bị xóa
+    private boolean isDelete = false;
 }

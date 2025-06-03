@@ -25,7 +25,11 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    private Categories category;
+
+    @ManyToOne
+    @JoinColumn(name = "brand_id", nullable = false)
+    private Brands brand;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;

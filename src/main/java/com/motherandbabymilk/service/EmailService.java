@@ -26,7 +26,7 @@ public class EmailService {
                 case "registration":
                     context.setVariable("title", "Welcome! " + emailDetail.getReceiver().getUsername());
                     context.setVariable("mainMessage", "Thank you for joining us. We're excited to have you on board!");
-                    context.setVariable("actionUrl", "http://localhost:8080/");
+                    context.setVariable("actionUrl", "http://localhost:5173/");
                     context.setVariable("actionText", "Get Started");
                     template = this.templateEngine.process("email-template", context);
                     break;
@@ -36,7 +36,7 @@ public class EmailService {
                     context.setVariable("customerName", emailDetail.getReceiver().getUsername());
                     context.setVariable("mainMessage", "Your order has been cancelled.");
                     context.setVariable("reason", emailDetail.getReason());
-                    context.setVariable("actionUrl", "https://644f-118-69-182-149.ngrok-free.app");
+                    context.setVariable("actionUrl", "http://localhost:5173/");
                     context.setVariable("actionText", "View Orders");
                     context.setVariable("companyName", "MnBMilk");
                     context.setVariable("companyAddress", "566 Vo Van Ngan Street, HCM City, VietNam");
@@ -46,7 +46,7 @@ public class EmailService {
                 case "resetPassword":
                     context.setVariable("title", "Password Reset Request");
                     context.setVariable("mainMessage", "We received a request to reset your password.");
-                    context.setVariable("actionUrl", "https://644f-118-69-182-149.ngrok-free.app/reset-password?token=" + emailDetail.getToken());
+                    context.setVariable("actionUrl", "http://localhost:5173/reset-password?token=" + emailDetail.getToken());
                     context.setVariable("actionText", "Reset Password");
                     context.setVariable("companyName", "MnBMilk");
                     template = this.templateEngine.process("reset-password-template", context);

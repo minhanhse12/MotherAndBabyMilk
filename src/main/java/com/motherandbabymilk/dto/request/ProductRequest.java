@@ -29,6 +29,10 @@ public class ProductRequest {
     @Min(value = 1, message = "Category ID must be positive!")
     private int categoryId;
 
+    @Schema(description = "Brand ID", example = "1")
+    @Min(value = 1, message = "Brand ID must be positive!")
+    private int brandId;
+
     @Schema(description = "Product quantity", example = "100")
     @Min(value = 0, message = "Quantity must be non-negative!")
     private int quantity;

@@ -1,7 +1,6 @@
 package com.motherandbabymilk.controller;
 
 import com.motherandbabymilk.dto.*;
-import com.motherandbabymilk.dto.request.ForgotPasswordRequest;
 import com.motherandbabymilk.dto.request.Login;
 import com.motherandbabymilk.dto.request.Registration;
 import com.motherandbabymilk.dto.response.RegistrationResponse;
@@ -17,7 +16,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -120,11 +118,5 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to reset password.");
         }
-    }
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity deleteUser(@PathVariable("userId") int userId) {
-        Users deletedUsers = userService.delete(userId);
-        return ResponseEntity.ok(deletedUsers);
     }
 }
