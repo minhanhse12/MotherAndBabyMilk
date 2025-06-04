@@ -20,7 +20,7 @@ public class BrandController {
     private BrandService brandService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<BrandResponse> createBrand(@Valid @RequestBody BrandRequest request ) {
         BrandResponse response = brandService.createBrand(request)    ;
         return ResponseEntity.ok(response);
@@ -39,14 +39,14 @@ public class BrandController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<BrandResponse> updateBrand(@PathVariable("id") int id, @Valid @RequestBody BrandRequest request) {
         BrandResponse response = brandService.updateBrands(id, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<String> deleteBrand(@PathVariable("id") int id) {
         brandService.deleteBrand(id);
         return ResponseEntity.ok("Product deleted successfully");

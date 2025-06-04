@@ -26,10 +26,7 @@ public class Article {
     private int authorId;
 
     @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "status", nullable = false)
-    private boolean status;
+    private LocalDateTime createdDate;;
 
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete = false;
