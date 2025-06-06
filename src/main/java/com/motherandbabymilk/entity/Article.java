@@ -22,8 +22,9 @@ public class Article {
     @Column(name = "image")
     private String image;
 
-    @Column(name = "author_id", nullable = false)
-    private int authorId;
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private Users author;
 
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;

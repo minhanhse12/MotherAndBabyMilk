@@ -4,16 +4,16 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "order_items")
+@Table(name = "invoice_items")
 @Data
-public class OrderItem {
+public class InvoiceItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @JoinColumn(name = "invoice_id", nullable = false)
+    private Invoice invoice;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
