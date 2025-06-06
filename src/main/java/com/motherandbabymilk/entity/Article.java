@@ -22,8 +22,8 @@ public class Article {
     @Column(name = "image")
     private String image;
 
-    @Column(name = "author_id", nullable = false)
-    private int authorId;
+    @Column(name = "author_name", nullable = false)
+    private String authorName;
 
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;;
