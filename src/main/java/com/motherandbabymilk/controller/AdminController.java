@@ -36,7 +36,6 @@ public class AdminController {
         return ResponseEntity.ok(update);
     }
 
-
     @GetMapping({"/user"})
     public List getAllUsers() {
         return this.userService.getAllUser();

@@ -22,15 +22,11 @@ public class Article {
     @Column(name = "image")
     private String image;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
-    private Users author;
+    @Column(name = "author_name", nullable = false)
+    private String authorName;
 
     @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "status", nullable = false)
-    private boolean status;
+    private LocalDateTime createdDate;;
 
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete = false;
