@@ -23,8 +23,14 @@ public class ProductResponse {
     @Schema(description = "Category ID", example = "1")
     private int categoryId;
 
+    @Schema(description = "Category", example = "Abbott")
+    private String categoryName;
+
     @Schema(description = "Brand ID", example = "1")
     private int BrandId;
+
+    @Schema(description = "Brand name", example = "Abbott")
+    private String brandName;
 
     @Schema(description = "Product quantity", example = "100")
     private int quantity;

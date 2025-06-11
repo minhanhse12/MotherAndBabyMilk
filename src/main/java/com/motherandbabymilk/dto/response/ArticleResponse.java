@@ -25,4 +25,7 @@ public class ArticleResponse {
 
     @Schema(description = "Date the article was created", example = "2025-06-06T10:15:30")
     private LocalDateTime createdDate;
+
+    @Schema(description = "Is delete")
+    private boolean isDelete;
 }

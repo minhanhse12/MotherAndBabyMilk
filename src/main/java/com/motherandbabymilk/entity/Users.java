@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
+@ToString(exclude = {"password"})
 @Entity
 public class Users implements UserDetails {
     @Id

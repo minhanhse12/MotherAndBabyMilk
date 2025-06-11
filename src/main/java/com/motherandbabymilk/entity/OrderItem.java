@@ -17,11 +17,19 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private Product productId;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "price", nullable = false)
-    private double price;
+    @Column(name = "unit_price", nullable = false)
+    private double unitPrice;
+
+    @Column(name = "total_price", nullable = false)
+    private double totalAmount;
+
+    @PrePersist
+    public void calculateTotalPrice() {
+        this.totalAmount = this.unitPrice * this.quantity;
+    }
 }

@@ -3,6 +3,8 @@ package com.motherandbabymilk.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "products")
 @Data
@@ -23,11 +25,11 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Categories category;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)
     private Brands brand;
 
@@ -39,4 +41,10 @@ public class Product {
 
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete = false;
+
+    @OneToMany(mappedBy = "product")
+    private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "productId")
+    private List<OrderItem> orderItems;
 }

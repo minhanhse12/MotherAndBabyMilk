@@ -2,12 +2,14 @@ package com.motherandbabymilk.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
 @Data
+@ToString(exclude = {"order"})
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,16 +23,16 @@ public class Payment {
     private double amount;
 
     @Column(name = "payment_method", nullable = false)
-    private String paymentMethod; // CREDIT_CARD, PAYPAL, CASH_ON_DELIVERY
+    private String paymentMethod;
 
     @Column(name = "payment_date", nullable = false)
     private LocalDateTime paymentDate;
 
+    @Column(name = "transaction_code", nullable = false)
+    private String transactionCode;
+
     @Column(name = "status", nullable = false)
     private String status; // PENDING, COMPLETED, FAILED
-
-    @Column(name = "is_delete", nullable = false)
-    private boolean isDelete = false;
 
     @PrePersist
     public void setPaymentDate() {

@@ -13,8 +13,8 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<CartItem> cartItems;
 
     @Column(nullable = false, columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double totalPrice;
@@ -27,4 +27,8 @@ public class Cart {
 
     @Column
     private LocalDateTime updatedAt;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)
+    private Users user;
 }
