@@ -13,8 +13,9 @@ public class LoyaltyPoint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 
     @Column(nullable = false)
     private int points; // Số điểm cộng hoặc trừ
@@ -23,7 +24,7 @@ public class LoyaltyPoint {
     private String type; // earn, redeem, adjust
 
     @Column
-    private String description; // Ví dụ: "Mua đơn hàng #123", "Đổi voucher 50k", "Tặng sinh nhật"
+    private String description;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

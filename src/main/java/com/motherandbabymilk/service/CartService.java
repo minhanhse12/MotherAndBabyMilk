@@ -132,7 +132,9 @@ public class CartService {
 
         CartResponse response = new CartResponse();
         response.setUserId(userId);
-                response.setCartItems(cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId()).stream()
+
+        response.setCartItems(cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId()).stream()
+
                 .map(item -> {
                     CartItemResponse itemResponse = new CartItemResponse();
                     itemResponse.setId((int) item.getId());
