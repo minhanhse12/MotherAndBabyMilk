@@ -2,9 +2,6 @@ package com.motherandbabymilk.dto.response;
 
 import lombok.Data;
 
-/**
- * DTO for returning cart item details.
- */
 @Data
 public class CartItemResponse {
 

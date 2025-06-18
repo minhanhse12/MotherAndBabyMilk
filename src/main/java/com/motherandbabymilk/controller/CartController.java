@@ -3,7 +3,6 @@ package com.motherandbabymilk.controller;
 import com.motherandbabymilk.dto.request.CartRequest;
 import com.motherandbabymilk.dto.response.CartResponse;
 import com.motherandbabymilk.entity.Users;
-import com.motherandbabymilk.exception.EntityNotFoundException;
 import com.motherandbabymilk.service.CartService;
 import com.motherandbabymilk.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -22,12 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Service for managing cart-related operations.
- */
+
 @Service
 public class CartService {
 
@@ -48,13 +45,6 @@ public class CartService {
     @Autowired
     private ModelMapper modelMapper;
 
-    /**
-     * Adds a product to the user's cart or updates the quantity if it already exists.
-     * Checks product stock before adding.
-     * @param userId the ID of the user
-     * @param request the cart request DTO
-     * @return the updated cart response
-     */
     @Transactional
     public CartResponse addToCart(int userId, @Valid CartRequest request) {
         Users user = userRepository.findUsersById(userId);
@@ -99,14 +89,6 @@ public class CartService {
         return getCart(userId);
     }
 
-    /**
-     * Updates the quantity of a cart item.
-     * Checks product stock before updating.
-     * @param userId the ID of the user
-     * @param productId the ID of the product
-     * @param quantity the new quantity
-     * @return the updated cart response
-     */
     @Transactional
     public CartResponse updateCartItem(int userId, int productId, @Min(value = 1, message = "Quantity must be at least 1") int quantity) {
         Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
@@ -130,11 +112,6 @@ public class CartService {
         return getCart(userId);
     }
 
-    /**
-     * Removes a product from the user's cart.
-     * @param userId the ID of the user
-     * @param productId the ID of the product
-     */
     @Transactional
     public void removeFromCart(int userId, int productId) {
         Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
@@ -149,18 +126,13 @@ public class CartService {
         logger.info("Removed product ID {} from cart ID {}", productId, cart.getId());
     }
 
-    /**
-     * Retrieves the user's cart.
-     * @param userId the ID of the user
-     * @return the cart response
-     */
     public CartResponse getCart(int userId) {
         Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
 
         CartResponse response = new CartResponse();
         response.setUserId(userId);
-                response.setCartItems(cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId()).stream()
+        response.setCartItems(cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId()).stream()
                 .map(item -> {
                     CartItemResponse itemResponse = new CartItemResponse();
                     itemResponse.setId((int) item.getId());
@@ -180,10 +152,6 @@ public class CartService {
         return response;
     }
 
-    /**
-     * Clears the user's cart (soft delete all items).
-     * @param userId the ID of the user
-     */
     @Transactional
     public void clearCart(int userId) {
         Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
@@ -199,10 +167,6 @@ public class CartService {
         logger.info("Cleared cart ID {} for user ID {}", cart.getId(), userId);
     }
 
-    /**
-     * Updates the total price of the cart based on its items.
-     * @param cart the cart to update
-     */
     private void updateCartTotalPrice(Cart cart) {
         double totalPrice = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId()).stream()
                 .mapToDouble(CartItem::getTotalPrice)

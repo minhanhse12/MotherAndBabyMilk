@@ -3,8 +3,8 @@ package com.motherandbabymilk.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.ClientInfoStatus;
 import java.util.List;
+
 @Entity
 @Table(name = "products")
 @Data
@@ -25,11 +25,11 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Categories category;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)
     private Brands brand;
 
@@ -45,6 +45,6 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<InvoiceItem> invoiceItems;
+    @OneToMany(mappedBy = "productId")
+    private List<OrderItem> orderItems;
 }
