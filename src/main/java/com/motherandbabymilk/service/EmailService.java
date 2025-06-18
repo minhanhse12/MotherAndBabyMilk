@@ -67,5 +67,4 @@ public class EmailService {
             System.out.println("ERROR SENT MAIL!!");
         }
     }
-
 }

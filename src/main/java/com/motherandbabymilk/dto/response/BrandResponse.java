@@ -22,4 +22,7 @@ public class BrandResponse {
     @Schema(description = "Brand description", example = "Vinamilk is a ...")
     @Size(max = 500, message = "Description must be less than 500 characters!")
     private String description;
+
+    @Schema(description = "Is delete")
+    private boolean isDelete;
 }

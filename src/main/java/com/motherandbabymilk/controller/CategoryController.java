@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/Categories")
+@RequestMapping("/api/categories")
 @SecurityRequirement(name = "api")
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request ) {
         CategoryResponse response = categoryService.createCategory(request)    ;
         return ResponseEntity.ok(response);
@@ -39,7 +39,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<CategoryResponse> updateCategory(@PathVariable("id") int id, @Valid @RequestBody CategoryRequest request) {
         CategoryResponse response = categoryService.updateCategories(id, request);
         return ResponseEntity.ok(response);

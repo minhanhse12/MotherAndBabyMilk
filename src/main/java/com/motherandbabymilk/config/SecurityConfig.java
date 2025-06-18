@@ -53,7 +53,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("/api/login", "/api/register", "/api/forgot-password", "/api/request-reset-password", "/reset-password","/api/reset-password/**" ,
-                                "/api/products", "/api/products/**","/api/brands" , "/api/brands/**", "/api/categories" , "/api/categories/**", "/swagger-ui/**", "/v3/api-docs/**")
+                                "/api/products", "/api/products/**","/api/brands" , "/api/brands/**","/api/articles" , "/api/articles/**", "/api/categories" , "/api/categories/**",
+                                "/swagger-ui/**", "api/orders", "api/orders/**", "api/payments", "api/payments/**", "/api/payments/callback", "/v3/api-docs/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .userDetailsService(userService)
