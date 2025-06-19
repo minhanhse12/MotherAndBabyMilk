@@ -16,8 +16,8 @@ public class Payment {
     private int id;
 
     @OneToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @JoinColumn(name = "invoice_id", nullable = false)
+    private Invoice invoice;
 
     @Column(name = "amount", nullable = false)
     private double amount;

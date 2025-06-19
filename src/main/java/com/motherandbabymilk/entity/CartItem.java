@@ -34,6 +34,8 @@ public class CartItem {
     @Column(nullable = false)
     private java.time.LocalDateTime addedAt;
 
+
+
     @Column(nullable = false)
     private boolean isSelect = true;
 

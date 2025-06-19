@@ -31,4 +31,6 @@ public class Cart {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)
     private Users user;
+
 }
+
