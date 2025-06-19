@@ -18,6 +18,9 @@ public class ArticleRequest {
     @NotBlank(message = "Content cannot be blank!")
     private String content;
 
+    @Schema(description = "URL of the article", example = "https://example.com/article.jpg")
+    private String link;
+
     @Schema(description = "URL of the article's image", example = "https://example.com/article-image.jpg")
     @NotBlank(message = "Image URL cannot be blank!")
     private String image;

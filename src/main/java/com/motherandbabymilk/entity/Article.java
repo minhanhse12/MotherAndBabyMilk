@@ -19,6 +19,9 @@ public class Article {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "link")
+    private String link;
+
     @Column(name = "image")
     private String image;
 
