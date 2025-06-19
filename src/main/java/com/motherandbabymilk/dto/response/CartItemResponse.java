@@ -13,4 +13,5 @@ public class CartItemResponse {
     private Double totalPrice;
     private String note;
     private boolean isSelected ;
+    private String image;
 }
