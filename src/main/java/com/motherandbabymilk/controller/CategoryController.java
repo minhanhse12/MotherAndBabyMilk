@@ -26,13 +26,13 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable("id") int id) {
         CategoryResponse response = categoryService.getCategoryById(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("getAll")
     public ResponseEntity<List<CategoryResponse>> getAllCategorys() {
         List<CategoryResponse> Categories = categoryService.getAllCategories();
         return ResponseEntity.ok(Categories);

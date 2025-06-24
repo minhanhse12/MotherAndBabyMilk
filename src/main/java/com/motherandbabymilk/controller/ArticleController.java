@@ -26,13 +26,13 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<ArticleResponse> getArticleById(@PathVariable("id") int id) {
         ArticleResponse response = articleService.getArticleById(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("getAll")
     public ResponseEntity<List<ArticleResponse>> getAllArticles() {
         List<ArticleResponse> articles = articleService.getAllArticles();
         return ResponseEntity.ok(articles);

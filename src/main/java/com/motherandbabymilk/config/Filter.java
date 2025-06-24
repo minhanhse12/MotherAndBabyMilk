@@ -29,7 +29,7 @@ public class Filter extends OncePerRequestFilter {
     @Qualifier("handlerExceptionResolver")
     @Autowired
     HandlerExceptionResolver resolver;
-    private final List<String> AUTH_PERMISSIONS = List.of("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/api/login", "/api/register", "/api/request-reset-password","/reset-password", "/api/reset-password/**", "/api/products/**", "/api/brands/**", "/api/categories", "/api/articles/**");
+    private final List<String> AUTH_PERMISSIONS = List.of("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/api/login", "/api/register", "/api/request-reset-password","/reset-password", "/api/reset-password/**", "/api/products/get/**", "/api/products/getAll", "/api/categories/getAll", "/api/categories/get/**", "/api/articles/getAll", "/api/articles/get/**", "/api/brands/getAll", "/api/brands/get/**");
 
     public Filter() {
     }
