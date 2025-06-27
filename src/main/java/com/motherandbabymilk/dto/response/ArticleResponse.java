@@ -20,6 +20,9 @@ public class ArticleResponse {
     @Schema(description = "URL of the article's image", example = "https://example.com/article-image.jpg")
     private String image;
 
+    @Schema(description = "URL of the article", example = "https://example.com/article.jpg")
+    private String link;
+
     @Schema(description = "Author's name", example = "Dr. Jane Smith")
     private String authorName;
 
