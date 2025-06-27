@@ -1,7 +1,6 @@
 package com.motherandbabymilk.controller;
 
 import com.motherandbabymilk.dto.UpdateProfile;
-import com.motherandbabymilk.dto.response.RegistrationResponse;
 import com.motherandbabymilk.dto.response.UpdateResponse;
 import com.motherandbabymilk.entity.Users;
 import com.motherandbabymilk.service.UserService;

@@ -145,6 +145,7 @@ public class CartService {
                     itemResponse.setTotalPrice(item.getTotalPrice());
                     itemResponse.setNote(item.getNote());
                     itemResponse.setSelected(item.isSelect());
+                    itemResponse.setImage(item.getProduct().getImage());
                     return itemResponse;
                 })
                 .collect(Collectors.toList()));

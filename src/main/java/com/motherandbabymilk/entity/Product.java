@@ -1,5 +1,6 @@
 package com.motherandbabymilk.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -47,4 +48,15 @@ public class Product {
 
     @OneToMany(mappedBy = "productId")
     private List<OrderItem> orderItems;
+
+    @JsonIgnore
+    public ProductLine getProductLine() {
+        String catName = this.category.getName().toLowerCase();
+        if (catName.contains("mẹ")) {
+            return ProductLine.MOTHER;
+        } else if (catName.contains("bé")) {
+            return ProductLine.BABY;
+        }
+        return null;
+    }
 }
