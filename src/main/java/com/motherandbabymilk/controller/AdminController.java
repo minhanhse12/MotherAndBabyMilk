@@ -1,6 +1,6 @@
 package com.motherandbabymilk.controller;
 
-import com.motherandbabymilk.dto.UpdateProfile;
+import com.motherandbabymilk.dto.request.UpdateRequest;
 import com.motherandbabymilk.dto.response.UpdateResponse;
 import com.motherandbabymilk.entity.Users;
 import com.motherandbabymilk.service.UserService;
@@ -29,7 +29,7 @@ public class AdminController {
     @PutMapping("/user/{userId}")
     public ResponseEntity<UpdateResponse> updateUserByAdmin(
             @PathVariable ("userId")int id,
-            @RequestBody UpdateProfile updateProfile) {
+            @RequestBody UpdateRequest updateProfile) {
 
         UpdateResponse update = this.userService.updateUserByAdmin(id, updateProfile);
         return ResponseEntity.ok(update);

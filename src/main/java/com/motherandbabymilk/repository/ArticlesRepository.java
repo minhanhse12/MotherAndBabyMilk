@@ -15,9 +15,6 @@ public interface ArticlesRepository extends JpaRepository<Article, Integer> {
     @Query("SELECT p FROM Article p WHERE p.title = :title AND p.isDelete = false")
     Article findByTitle(@Param("title") String title);
 
-//    @Query("SELECT p FROM articles p WHERE p.id = :id AND p.isDelete = false")
-//    Optional<Article> findById(@Param("id") int id);
-
     @Query("SELECT p FROM Article p WHERE p.isDelete = false")
     List<Article> findAllNotDelete();
 }

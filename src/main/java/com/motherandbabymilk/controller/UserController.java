@@ -3,6 +3,7 @@ package com.motherandbabymilk.controller;
 import com.motherandbabymilk.dto.*;
 import com.motherandbabymilk.dto.request.Login;
 import com.motherandbabymilk.dto.request.Registration;
+import com.motherandbabymilk.dto.request.UpdateRequest;
 import com.motherandbabymilk.dto.response.RegistrationResponse;
 import com.motherandbabymilk.dto.response.UpdateResponse;
 import com.motherandbabymilk.dto.response.UserResponse;
@@ -69,7 +70,7 @@ public class UserController {
     }
 
     @PutMapping("/customer/{customerId}")
-    public ResponseEntity   <UpdateResponse> updateCustomer(@Valid @RequestBody UpdateProfile updateProfile) {
+    public ResponseEntity   <UpdateResponse> updateCustomer(@Valid @RequestBody UpdateRequest updateProfile) {
         UpdateResponse update = userService.updateCustomerProfile(updateProfile);
         return ResponseEntity.ok(update);
     }

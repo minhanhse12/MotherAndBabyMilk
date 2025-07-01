@@ -9,4 +9,5 @@ public class OrderRequest {
     private int userId;
     private double totalAmount;
     private List<OrderItemRequest> orderItems;
+    private String address;
 }
