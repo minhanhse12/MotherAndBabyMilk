@@ -26,6 +26,9 @@ public class ProductResponse {
     @Schema(description = "Category", example = "Abbott")
     private String categoryName;
 
+    @Schema(description = "Main product line", example = "MOTHER")
+    private String productLine;
+
     @Schema(description = "Brand ID", example = "1")
     private int BrandId;
 

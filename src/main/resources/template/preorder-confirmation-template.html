@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pre-Order Confirmation</title>
+</head>
+<body>
+<h1 th:text="${title}">Pre-Order Confirmation</h1>
+<p th:text="${mainMessage}">Your pre-order has been confirmed. Please proceed with payment.</p>
+<a th:href="${actionUrl}" th:text="${actionText}">Proceed to Payment</a>
+<p th:text="'Company: ' + ${companyName}">Your Company</p>
+</body>
+</html>
