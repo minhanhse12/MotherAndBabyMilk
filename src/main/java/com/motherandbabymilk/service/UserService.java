@@ -1,8 +1,7 @@
 package com.motherandbabymilk.service;
 
-import com.motherandbabymilk.dto.*;
 import com.motherandbabymilk.dto.EmailDetail;
-import com.motherandbabymilk.dto.request.ForgotPasswordRequest;
+import com.motherandbabymilk.dto.request.UpdateRequest;
 import com.motherandbabymilk.dto.response.UpdateResponse;
 import com.motherandbabymilk.dto.request.Login;
 import com.motherandbabymilk.dto.request.Registration;
@@ -113,7 +112,7 @@ public class UserService implements UserDetailsService {
 
     public void logout() {}
 
-    public UpdateResponse updateCustomerProfile(UpdateProfile updateProfile) {
+    public UpdateResponse updateCustomerProfile(UpdateRequest updateProfile) {
         Users currentUser = this.getCurrentAccount();
         if (currentUser == null) {
             throw new EntityNotFoundException("Customer not found!");
@@ -156,7 +155,7 @@ public class UserService implements UserDetailsService {
         }).collect(Collectors.toList());
     }
 
-    public UpdateResponse updateUserByAdmin(int id, UpdateProfile updateProfile) {
+    public UpdateResponse updateUserByAdmin(int id, UpdateRequest updateProfile) {
         Users user = this.userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found!"));
 

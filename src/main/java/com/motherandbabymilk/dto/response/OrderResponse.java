@@ -13,6 +13,7 @@ public class OrderResponse {
     private LocalDateTime orderDate;
     private LocalDateTime paidAt;
     private double totalAmount;
+    private String address;
     private OrderStatus status;
     private List<OrderItemResponse> orderItems;
 }

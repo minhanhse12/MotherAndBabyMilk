@@ -1,11 +1,11 @@
-package com.motherandbabymilk.dto;
+package com.motherandbabymilk.dto.request;
 
 
 import com.motherandbabymilk.entity.Roles;
 import lombok.Data;
 
 @Data
-public class UpdateProfile {
+public class UpdateRequest {
     private String fullName;
     private Roles roles;
     private String phone;

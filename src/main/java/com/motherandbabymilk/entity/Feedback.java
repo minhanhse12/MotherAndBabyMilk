@@ -11,10 +11,10 @@ public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(nullable = false)
-    private Long userId;
+    private int userId;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
@@ -26,12 +26,11 @@ public class Feedback {
     @Column(length = 1000)
     private String comment;
 
-
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
-    private boolean isApproved = false; // Staff duyệt (nếu cần kiểm duyệt)
+    private boolean isApproved = false;
 
     @PrePersist
     protected void onCreate() {

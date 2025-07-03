@@ -31,13 +31,14 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     @GetMapping
     public ResponseEntity<List<OrderResponse>> getAllOrders() {
         List<OrderResponse> responseList = orderService.getAllOrders();
         return ResponseEntity.ok(responseList);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     @PutMapping("/{orderId}")
     public ResponseEntity<OrderResponse> updateOrder(
             @PathVariable int orderId,
@@ -46,7 +47,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<String> deleteOrder(@PathVariable int orderId) {
         orderService.deleteOrder(orderId);

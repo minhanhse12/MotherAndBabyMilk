@@ -1,13 +1,17 @@
 package com.motherandbabymilk.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
 @Table(name = "products")
-@Data
+@Getter
+@Setter
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,4 +51,22 @@ public class Product {
 
     @OneToMany(mappedBy = "productId")
     private List<OrderItem> orderItems;
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+        if (quantity == 0) {
+            this.status = false;
+        }
+    }
+
+    @JsonIgnore
+    public ProductLine getProductLine() {
+        String catName = this.category.getName().toLowerCase();
+        if (catName.contains("mẹ")) {
+            return ProductLine.MOTHER;
+        } else if (catName.contains("bé")) {
+            return ProductLine.BABY;
+        }
+        return null;
+    }
 }

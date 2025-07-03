@@ -65,6 +65,13 @@ public class ProductService {
 
     @Transactional
     public List<ProductResponse> getAllProducts() {
+
+        modelMapper.typeMap(Product.class, ProductResponse.class)
+                .addMappings(mapper -> mapper.map(
+                        src -> src.getProductLine() != null ? src.getProductLine().name() : null,
+                        ProductResponse::setProductLine
+                ));
+
         List<Product> products = productRepository.findAllNotDelete();
         return products.stream()
                 .map(product -> {

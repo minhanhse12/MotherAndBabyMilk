@@ -39,7 +39,4 @@ public class ProductRequest {
 
     @Schema(description = "", example = "1")
     private int id;
-
-    @Schema(description = "Product status", example = "true")
-    private boolean status;
 }

@@ -31,6 +31,9 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     private double totalAmount;
 
+    @Column(name = "address", nullable = false)
+    private double address;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OrderStatus status = OrderStatus.PENDING;

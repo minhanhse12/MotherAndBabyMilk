@@ -26,13 +26,13 @@ public class BrandController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<BrandResponse> getBrandById(@PathVariable("id") int id) {
         BrandResponse response = brandService.getBrandById(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/getAll")
     public ResponseEntity<List<BrandResponse>> getAllBrands() {
         List<BrandResponse> brands = brandService.getAllBrands();
         return ResponseEntity.ok(brands);
