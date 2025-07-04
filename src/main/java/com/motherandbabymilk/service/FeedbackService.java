@@ -5,14 +5,14 @@ import com.motherandbabymilk.dto.request.FeedbackUpdate;
 import com.motherandbabymilk.dto.response.FeedbackResponse;
 import com.motherandbabymilk.entity.Feedback;
 import com.motherandbabymilk.entity.Product;
+import com.motherandbabymilk.entity.Users;
 import com.motherandbabymilk.exception.DuplicateProductException;
 import com.motherandbabymilk.exception.ResourceNotFoundException;
 import com.motherandbabymilk.repository.FeedbackRepository;
 import com.motherandbabymilk.repository.ProductRepository;
+import com.motherandbabymilk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +31,9 @@ public class FeedbackService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     // Tạo feedback mới
     public FeedbackResponse createFeedback(FeedbackRequest requestDTO) {
         // Kiểm tra xem user đã feedback cho product này chưa
@@ -41,23 +44,21 @@ public class FeedbackService {
             throw new DuplicateProductException("User has already provided feedback for this product");
         }
 
-        // Kiểm tra product có tồn tại không
         Product product = productRepository.findById(requestDTO.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + requestDTO.getProductId()));
 
-        // Tạo feedback mới
+        Users user = userRepository.findUsersById(requestDTO.getUserId());
+
         Feedback feedback = new Feedback();
-        feedback.setUserId(requestDTO.getUserId());
+        feedback.setUser(user);
         feedback.setProduct(product);
         feedback.setRating(requestDTO.getRating());
         feedback.setComment(requestDTO.getComment());
-        feedback.setApproved(false); // Mặc định chưa được approve
-
+        feedback.setApproved(false);
         Feedback savedFeedback = feedbackRepository.save(feedback);
         return mapToResponseDTO(savedFeedback);
     }
 
-    // Lấy feedback theo ID
     @Transactional(readOnly = true)
     public FeedbackResponse getFeedbackById(int id) {
         Feedback feedback = feedbackRepository.findById(id)
@@ -65,7 +66,6 @@ public class FeedbackService {
         return mapToResponseDTO(feedback);
     }
 
-    // Lấy tất cả feedback
     @Transactional(readOnly = true)
     public List<FeedbackResponse> getAllFeedbacks() {
         List<Feedback> feedbacks = feedbackRepository.findAll();
@@ -74,7 +74,6 @@ public class FeedbackService {
                 .toList();
     }
 
-    // Lấy feedback theo user ID
     @Transactional(readOnly = true)
     public List<FeedbackResponse> getFeedbacksByUserId(int userId) {
         List<Feedback> feedbacks = feedbackRepository.findByUserId(userId);
@@ -168,7 +167,8 @@ public class FeedbackService {
     private FeedbackResponse mapToResponseDTO(Feedback feedback) {
         FeedbackResponse dto = new FeedbackResponse();
         dto.setId(feedback.getId());
-        dto.setUserId(feedback.getUserId());
+        dto.setUserId(feedback.getUser().getId());
+        dto.setFullName(feedback.getUser().getFullName());
         dto.setProductId(feedback.getProduct().getId());
         dto.setProductName(feedback.getProduct().getName()); // Giả sử Product có field name
         dto.setRating(feedback.getRating());

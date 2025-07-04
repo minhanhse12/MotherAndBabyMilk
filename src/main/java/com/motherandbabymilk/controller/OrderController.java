@@ -19,9 +19,18 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+//    @PostMapping("/place/{userId}")
+//    public ResponseEntity<OrderResponse> placeOrderFromCart(@PathVariable int userId) {
+//        OrderResponse response = orderService.placeOrderFromCart(userId);
+//        return ResponseEntity.ok(response);
+//    }
+
     @PostMapping("/place/{userId}")
-    public ResponseEntity<OrderResponse> placeOrderFromCart(@PathVariable int userId) {
-        OrderResponse response = orderService.placeOrderFromCart(userId);
+    public ResponseEntity<OrderResponse> placeOrderFromCart(
+            @PathVariable int userId,
+            @RequestParam String address) {
+
+        OrderResponse response = orderService.placeOrderFromCart(userId, address);
         return ResponseEntity.ok(response);
     }
 
