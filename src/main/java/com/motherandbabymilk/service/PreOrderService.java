@@ -44,26 +44,31 @@ public class PreOrderService {
 
     @Transactional
     public PreOrderResponse createPreOrder(int userId, PreOrderRequest request) {
-        Users user = userRepository.findUsersById(userId);
-        if (user == null) {
-            throw new EntityNotFoundException("User with ID " + userId + " not found");
-        }
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + request.getProductId() + " not found"));
+
         if (product.getQuantity() > 0) {
             throw new IllegalStateException("Product is in stock. Use cart instead.");
         }
 
+        boolean alreadyExists = preOrderRepository.existsByUserIdAndProductIdAndStatus(userId, request.getProductId(), PreOrderStatus.PENDING);
+        if (alreadyExists) {
+            throw new IllegalStateException("You have already pre-ordered this product.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
         PreOrder preOrder = new PreOrder();
         preOrder.setUser(user);
         preOrder.setProduct(product);
         preOrder.setQuantity(request.getQuantity());
         preOrder.setNote(request.getNote());
         preOrder.setStatus(PreOrderStatus.PENDING);
-        preOrder.setCreatedAt(LocalDateTime.now());
+        preOrder.setCreatedAt(now);
 
         PreOrder savedPreOrder = preOrderRepository.save(preOrder);
-
         PreOrderResponse response = modelMapper.map(savedPreOrder, PreOrderResponse.class);
         response.setProductName(product.getName());
         return response;
@@ -73,24 +78,27 @@ public class PreOrderService {
     public PreOrderResponse updatePreOrderStatus(int preOrderId, PreOrderStatus status) {
         PreOrder preOrder = preOrderRepository.findById(preOrderId)
                 .orElseThrow(() -> new EntityNotFoundException("Pre-order with ID " + preOrderId + " not found"));
+
+        LocalDateTime now = LocalDateTime.now();
         preOrder.setStatus(status);
+
         if (status == PreOrderStatus.CONFIRMED) {
-            preOrder.setConfirmedAt(LocalDateTime.now());
-            // Gửi email yêu cầu thanh toán
+            preOrder.setConfirmedAt(now);
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(preOrder.getUser());
             emailDetail.setSubject("Pre-Order Confirmation");
             emailDetail.setLink(paymentUrl + "?preOrderId=" + preOrderId);
             emailService.sendEmail(emailDetail, "preOrderConfirmation");
+
         } else if (status == PreOrderStatus.FULFILLED) {
-            preOrder.setFulfilledAt(LocalDateTime.now());
-            // Gửi email thông báo hoàn thành
+            preOrder.setFulfilledAt(now);
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(preOrder.getUser());
             emailDetail.setSubject("Pre-Order Fulfilled");
             emailDetail.setLink(paymentUrl);
             emailService.sendEmail(emailDetail, "preOrderFulfilled");
         }
+
         PreOrder updatedPreOrder = preOrderRepository.save(preOrder);
         PreOrderResponse response = modelMapper.map(updatedPreOrder, PreOrderResponse.class);
         response.setProductName(updatedPreOrder.getProduct().getName());

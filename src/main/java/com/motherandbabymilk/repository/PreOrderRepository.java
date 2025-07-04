@@ -11,4 +11,5 @@ import java.util.List;
 public interface PreOrderRepository extends JpaRepository<PreOrder, Integer> {
     List<PreOrder> findByUserIdAndStatusNot(int userId, PreOrderStatus status);
     List<PreOrder> findByStatus(PreOrderStatus status);
+    boolean existsByUserIdAndProductIdAndStatus(int userId, int productId, PreOrderStatus status);
 }

@@ -53,17 +53,8 @@ public class CartController {
         Users user = userService.getCurrentAccount();
         CartOperationResponse response = cartService.updateCartItem(user.getId(), productId, quantity);
         if (!response.isSuccess() && response.getMessage().contains("Insufficient stock")) {
-            // Gợi ý đặt trước nếu sản phẩm hết hàng
             response.setMessage(response.getMessage() + ". This product is out of stock. Consider placing a pre-order.");
         }
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/preorder")
-    @Operation(summary = "Create pre-order for out-of-stock product", description = "Creates a pre-order for a product that is out of stock.")
-    public ResponseEntity<PreOrderResponse> createPreOrder(@Valid @RequestBody PreOrderRequest request) {
-        Users user = userService.getCurrentAccount();
-        PreOrderResponse response = preOrderService.createPreOrder(user.getId(), request);
         return ResponseEntity.ok(response);
     }
 
