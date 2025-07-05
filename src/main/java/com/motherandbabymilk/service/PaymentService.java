@@ -2,10 +2,10 @@ package com.motherandbabymilk.service;
 
 import com.motherandbabymilk.entity.*;
 import com.motherandbabymilk.exception.EntityNotFoundException;
-import com.motherandbabymilk.repository.OrderRepository;
-import com.motherandbabymilk.repository.PaymentRepository;
-import com.motherandbabymilk.repository.ProductRepository;
+import com.motherandbabymilk.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class PaymentService {
     private static final String VNPAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     private static final String VNP_HASH_SECRET = "VI6CNUGHU58HI2U74JXGYSR8MTWB90LQ";
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired
     OrderRepository orderRepository;
@@ -32,6 +34,10 @@ public class PaymentService {
     PaymentRepository paymentRepository;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
     public String generatePayment(int orderId, HttpServletRequest request) {
         try {
@@ -50,7 +56,7 @@ public class PaymentService {
             vnpParams.put("vnp_OrderInfo", "Payment for order " + orderId);
             vnpParams.put("vnp_OrderType", "order");
             vnpParams.put("vnp_Amount", String.valueOf((int) (totalAmount * 100))); // Convert to VND in cents
-            vnpParams.put("vnp_ReturnUrl", "http://localhost:5173/result");
+            vnpParams.put("vnp_ReturnUrl", "http://localhost:5173/successpayment");
             vnpParams.put("vnp_IpAddr", ipAddress);
             vnpParams.put("vnp_CreateDate", getCurrentDate());
 
@@ -140,8 +146,10 @@ public class PaymentService {
                     .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
             if ("00".equals(transactionStatus)) {
+                // PAYMENT THÀNH CÔNG
                 createPayment(transactionID, orderId, amount);
 
+                // Trừ số lượng sản phẩm từ inventory
                 for (OrderItem item : order.getOrderItems()) {
                     Product product = item.getProductId();
                     if (product.getQuantity() < item.getQuantity()) {
@@ -150,16 +158,69 @@ public class PaymentService {
                     product.setQuantity(product.getQuantity() - item.getQuantity());
                     productRepository.save(product);
                 }
-                updateOrderStatus(orderId);
+
+                // Cập nhật order status
+                updateOrderStatus(orderId, OrderStatus.PAID);
                 orderRepository.save(order);
 
+                // Xử lý cart sau khi payment thành công
+                handleSuccessfulPayment(order.getUser().getId());
                 return "SUCCESS";
-            } else {
-                createPayment(transactionID, orderId, amount);
+            } else {;
+                handleFailedPayment(order.getUser().getId());
+                updateOrderStatus(orderId, OrderStatus.CANCELED);
                 return "FAILED";
             }
         } catch (Exception e) {
+            logger.error("Error processing VNPay callback", e);
             return "ERROR";
+        }
+    }
+
+    public void handleSuccessfulPayment(int userId) {
+        Cart cart = cartRepository.findByUserId(userId).orElse(null);
+
+        if (cart != null && "pending_order".equals(cart.getStatus())) {
+            // Xóa mềm các items đã được order (những items được select)
+            List<CartItem> orderedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
+                    .stream()
+                    .filter(CartItem::isSelect)
+                    .toList();
+
+            orderedItems.forEach(item -> {
+                item.setDelete(true);
+                item.setAddedAt(LocalDateTime.now());
+                cartItemRepository.save(item);
+            });
+
+            // Bỏ select tất cả items còn lại (nếu có)
+            List<CartItem> remainingItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId());
+            remainingItems.forEach(item -> {
+                item.setSelect(false);
+                cartItemRepository.save(item);
+            });
+
+            // Cập nhật cart
+            cart.setStatus("active");
+            cart.setLastOrderId(null);
+            cartRepository.save(cart);
+
+            logger.info("Successfully processed payment for user {}, ordered items deleted from cart", userId);
+        }
+    }
+
+
+    public void handleFailedPayment(int userId) {
+        Cart cart = cartRepository.findByUserId(userId).orElse(null);
+
+        if (cart != null && "pending_order".equals(cart.getStatus())) {
+            // Khôi phục cart về trạng thái active, giữ nguyên tất cả items
+            cart.setStatus("active");
+            cart.setLastOrderId(null);
+            cart.setUpdatedAt(LocalDateTime.now());
+            cartRepository.save(cart);
+
+            logger.info("Payment failed for user {}, cart restored to active status", userId);
         }
     }
 
@@ -172,19 +233,20 @@ public class PaymentService {
         payment.setAmount(amount);
         payment.setPaymentMethod("VNPAY");
         payment.setTransactionCode(transactionCode);
-        payment.setStatus("PENDING");
+        payment.setStatus("PAID");
         paymentRepository.save(payment);
     }
 
-    private void updateOrderStatus(int orderId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
-        if (order != null) {
+private void updateOrderStatus(int orderId, OrderStatus newStatus) {
+    Order order = orderRepository.findById(orderId).orElse(null);
+    if (order != null) {
+        if (newStatus == OrderStatus.PAID) {
             order.setPaidAt(LocalDateTime.now());
-            order.setStatus(OrderStatus.PAID);
-            orderRepository.save(order);
-        } else {
-            System.out.println("Order not found with ID: " + orderId);
         }
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+    } else {
+        System.out.println("Order not found with ID: " + orderId);
     }
-
+}
 }

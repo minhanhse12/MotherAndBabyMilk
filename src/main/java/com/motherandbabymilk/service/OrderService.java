@@ -4,10 +4,12 @@ import com.motherandbabymilk.dto.request.OrderRequest;
 import com.motherandbabymilk.dto.response.OrderResponse;
 import com.motherandbabymilk.entity.*;
 import com.motherandbabymilk.exception.EntityNotFoundException;
+import com.motherandbabymilk.exception.IllegalStateException;
 import com.motherandbabymilk.repository.*;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,13 +40,22 @@ public class OrderService {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
+    @Transactional
     public OrderResponse placeOrderFromCart(int userId, String address) {
         // Validate address
         if (address == null || address.trim().isEmpty()) {
             throw new IllegalArgumentException("Address is required");
         }
 
-        Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
+        Users user = userRepository.findUsersById(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        // Lấy cart duy nhất của user
+        Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
 
         List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
@@ -56,15 +67,14 @@ public class OrderService {
             throw new IllegalStateException("No selected items in cart");
         }
 
-        Users user = userRepository.findUsersById(userId);
-        if (user == null) {
-            throw new EntityNotFoundException("User not found");
+        if ("pending_order".equals(cart.getStatus())) {
+            throw new IllegalStateException("Cart is already being processed for another order");
         }
 
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
-        order.setAddress(address.trim()); // Thêm address vào order
+        order.setAddress(address.trim());
 
         List<OrderItem> orderItems = new ArrayList<>();
         double total = 0;
@@ -93,15 +103,13 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        cart.setStatus("ordered");
+        // Đặt cart thành trạng thái pending order
+        cart.setStatus("pending_order");
+        cart.setLastOrderId(savedOrder.getId()); // Lưu order ID để tracking
         cart.setUpdatedAt(LocalDateTime.now());
         cartRepository.save(cart);
 
-        selectedItems.forEach(item -> {
-            item.setDelete(true);
-            cartItemRepository.save(item);
-        });
-
+        // Schedule task để hủy order nếu không thanh toán trong 5 phút
         long delayMillis = 5 * 60 * 1000;
         scheduler.schedule(() -> {
             Optional<Order> optionalOrder = orderRepository.findById(savedOrder.getId());
@@ -114,205 +122,23 @@ public class OrderService {
                     o.setStatus(OrderStatus.CANCELED);
                     orderRepository.save(o);
 
-                    Cart canceledCart = cartRepository.findById(cart.getId()).orElse(null);
-                    if (canceledCart != null) {
-                        canceledCart.setStatus("active");
-                        canceledCart.setUpdatedAt(LocalDateTime.now());
-                        cartRepository.save(canceledCart);
-
-                        List<CartItem> deletedItems = cartItemRepository.findByCartIdAndIsDeleteTrue(canceledCart.getId())
-                                .stream()
-                                .filter(CartItem::isDelete)
-                                .toList();
-
-                        deletedItems.forEach(item -> {
-                            item.setDelete(false);
-                            cartItemRepository.save(item);
-                        });
+                    // Khôi phục cart về trạng thái active
+                    Cart timeoutCart = cartRepository.findByUserId(userId).orElse(null);
+                    if (timeoutCart != null) {
+                        timeoutCart.setStatus("active");
+                        timeoutCart.setLastOrderId(0);
+                        timeoutCart.setUpdatedAt(LocalDateTime.now());
+                        cartRepository.save(timeoutCart);
                     }
+
+                    logger.info("Order {} canceled due to payment timeout", o.getId());
                 }
             }
         }, delayMillis, TimeUnit.MILLISECONDS);
 
         return modelMapper.map(savedOrder, OrderResponse.class);
     }
-//    @Transactional
-//    public OrderResponse placeOrderFromCart(int userId) {
-//        Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
-//                .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
-//
-//        List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
-//                .stream()
-//                .filter(CartItem::isSelect)
-//                .toList();
-//
-//        if (selectedItems.isEmpty()) {
-//            throw new IllegalStateException("No selected items in cart");
-//        }
-//
-//        Users user = userRepository.findUsersById(userId);
-//        if (user == null) {
-//            throw new EntityNotFoundException("User not found");
-//        }
-//
-//        Order order = new Order();
-//        order.setUser(user);
-//        order.setOrderDate(LocalDateTime.now());
-//
-//        List<OrderItem> orderItems = new ArrayList<>();
-//        double total = 0;
-//
-//        for (CartItem ci : selectedItems) {
-//            Product product = ci.getProduct();
-//            if (product.getQuantity() < ci.getQuantity()) {
-//                throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
-//            }
-//
-//            OrderItem item = new OrderItem();
-//            item.setOrder(order);
-//            item.setProductId(product);
-//            item.setQuantity(ci.getQuantity());
-//            item.setTotalAmount(ci.getUnitPrice());
-//            orderItems.add(item);
-//
-//            total += ci.getTotalPrice();
-//        }
-//
-//        Date paymentDeadline = new Date(System.currentTimeMillis() + 5 * 60 * 1000);
-//        order.setPaymentDeadline(paymentDeadline);
-//        order.setStatus(OrderStatus.PENDING);
-//        order.setTotalAmount(total);
-//        order.setOrderItems(orderItems);
-//
-//        Order savedOrder = orderRepository.save(order);
-//
-//        cart.setStatus("ordered");
-//        cart.setUpdatedAt(LocalDateTime.now());
-//        cartRepository.save(cart);
-//
-//        selectedItems.forEach(item -> {
-//            item.setDelete(true);
-//            cartItemRepository.save(item);
-//        });
-//
-//        long delayMillis = 5 * 60 * 1000;
-//        scheduler.schedule(() -> {
-//            Optional<Order> optionalOrder = orderRepository.findById(savedOrder.getId());
-//            if (optionalOrder.isPresent()) {
-//                Order o = optionalOrder.get();
-//                if (o.getStatus() == OrderStatus.PENDING &&
-//                        o.getPaymentDeadline() != null &&
-//                        o.getPaymentDeadline().before(new Date())) {
-//
-//                    o.setStatus(OrderStatus.CANCELED);
-//                    orderRepository.save(o);
-//
-//                    Cart canceledCart = cartRepository.findById(cart.getId()).orElse(null);
-//                    if (canceledCart != null) {
-//                        canceledCart.setStatus("active");
-//                        canceledCart.setUpdatedAt(LocalDateTime.now());
-//                        cartRepository.save(canceledCart);
-//
-//                        List<CartItem> deletedItems = cartItemRepository.findByCartIdAndIsDeleteTrue(canceledCart.getId())
-//                                .stream()
-//                                .filter(CartItem::isDelete)
-//                                .toList();
-//
-//                        deletedItems.forEach(item -> {
-//                            item.setDelete(false);
-//                            cartItemRepository.save(item);
-//                        });
-//                    }
-//                }
-//            }
-//        }, delayMillis, TimeUnit.MILLISECONDS);
-//
-//        return modelMapper.map(savedOrder, OrderResponse.class);
-//    }
 
-
-
-//    @Transactional
-//    public OrderResponse placeOrderFromCart(int userId) {
-//        Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
-//                .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
-//
-//        List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
-//                .stream()
-//                .filter(CartItem::isSelect)
-//                .toList();
-//
-//        if (selectedItems.isEmpty()) {
-//            throw new IllegalStateException("No selected items in cart");
-//        }
-//
-//        Users user = userRepository.findUsersById(userId);
-//        if (user == null) {
-//            throw new EntityNotFoundException("User not found");
-//        }
-//
-//        Order order = new Order();
-//        order.setUser(user);
-//        order.setOrderDate(LocalDateTime.now());
-//
-//        List<OrderItem> orderItems = new ArrayList<>();
-//        double total = 0;
-//
-//        for (CartItem ci : selectedItems) {
-//
-//            Product product = ci.getProduct();
-//            if (product.getQuantity() < ci.getQuantity()) {
-//                throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
-//            }
-//
-//            OrderItem item = new OrderItem();
-//            item.setOrder(order);
-//            item.setProductId(product);
-//            item.setQuantity(ci.getQuantity());
-//            item.setTotalAmount(ci.getUnitPrice());
-//            orderItems.add(item);
-//
-//            total += ci.getTotalPrice();
-//        }
-//
-//        Date paymentDeadline = new Date(System.currentTimeMillis() + 5 * 1000 * 60);
-//        order.setPaymentDeadline(paymentDeadline);
-//        order.setStatus(OrderStatus.PENDING);
-//
-//        order.setTotalAmount(total);
-//        order.setOrderItems(orderItems);
-//        Order savedOrder = orderRepository.save(order);
-//
-//        cart.setStatus("ordered");
-//        cart.setUpdatedAt(LocalDateTime.now());
-//        cartRepository.save(cart);
-//
-//        selectedItems.forEach(item -> {
-//            item.setDelete(true);
-//            cartItemRepository.save(item);
-//        });
-//
-//        return modelMapper.map(savedOrder, OrderResponse.class);
-//    }
-//
-//    @Scheduled(fixedRate = 60000)
-//    @Transactional
-//    public void checkAndCancelExpiredOrders() {
-//        cancelExpiredOrders();
-//    }
-//
-//    @Transactional
-//    public void cancelExpiredOrders() {
-//        List<Order> expiredOrders = orderRepository.findAllByStatus(OrderStatus.PENDING)
-//                .stream()
-//                .filter(order -> order.getPaymentDeadline() != null && order.getPaymentDeadline().before(new Date()))
-//                .toList();
-//
-//        for (Order order : expiredOrders) {
-//            order.setStatus(OrderStatus.CANCELED);
-//            orderRepository.save(order);
-//        }
-//    }
 
     @Transactional
     public OrderResponse getOrder(int orderId) {
@@ -347,4 +173,6 @@ public class OrderService {
         order.setDelete(true);
         orderRepository.save(order);
     }
+
+
 }
