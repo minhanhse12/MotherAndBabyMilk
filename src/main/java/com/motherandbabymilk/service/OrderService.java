@@ -1,6 +1,7 @@
 package com.motherandbabymilk.service;
 
 import com.motherandbabymilk.dto.request.OrderRequest;
+import com.motherandbabymilk.dto.response.OrderItemResponse;
 import com.motherandbabymilk.dto.response.OrderResponse;
 import com.motherandbabymilk.entity.*;
 import com.motherandbabymilk.exception.EntityNotFoundException;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 
 @Service
 public class OrderService {
@@ -136,22 +138,21 @@ public class OrderService {
             }
         }, delayMillis, TimeUnit.MILLISECONDS);
 
-        return modelMapper.map(savedOrder, OrderResponse.class);
+        return convertToOrderResponse(savedOrder);
     }
-
 
     @Transactional
     public OrderResponse getOrder(int orderId) {
         Order order = orderRepository.findByIdAndIsDeleteFalse(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-        return modelMapper.map(order, OrderResponse.class);
+        return convertToOrderResponse(order);
     }
 
     @Transactional
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepository.findByIsDeleteFalse();
         return orders.stream()
-                .map(order -> modelMapper.map(order, OrderResponse.class))
+                .map(this::convertToOrderResponse)
                 .toList();
     }
 
@@ -163,7 +164,7 @@ public class OrderService {
         order.setTotalAmount(request.getTotalAmount());
 
         Order updatedOrder = orderRepository.save(order);
-        return modelMapper.map(updatedOrder, OrderResponse.class);
+        return convertToOrderResponse(updatedOrder);
     }
 
     @Transactional
@@ -174,5 +175,27 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    private OrderResponse convertToOrderResponse(Order order) {
+        OrderResponse response = modelMapper.map(order, OrderResponse.class);
 
+        // Convert OrderItems to OrderItemResponse
+        List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+        for (OrderItem orderItem : order.getOrderItems()) {
+            Product product = orderItem.getProductId();
+
+            OrderItemResponse itemResponse = new OrderItemResponse();
+            itemResponse.setId(orderItem.getId());
+            itemResponse.setProductId(product.getId());
+            itemResponse.setProductName(product.getName());
+            itemResponse.setQuantity(orderItem.getQuantity());
+            itemResponse.setUnitPrice(product.getPrice()); // Sử dụng giá từ Product
+            itemResponse.setTotalPrice(product.getPrice() * orderItem.getQuantity());
+            itemResponse.setImage(product.getImage());
+
+            orderItemResponses.add(itemResponse);
+        }
+
+        response.setOrderItems(orderItemResponses);
+        return response;
+    }
 }
