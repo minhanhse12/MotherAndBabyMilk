@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -41,6 +42,7 @@ public class PreOrderController {
     public ResponseEntity<PreOrderResponse> updatePreOrderStatus(
             @Parameter(description = "ID of the pre-order", example = "123")
             @PathVariable int preOrderId,
+
             @Parameter(description = "New status", example = "CONFIRMED")
             @RequestParam PreOrderStatus status) {
         return ResponseEntity.ok(preOrderService.updatePreOrderStatus(preOrderId, status));
@@ -58,7 +60,7 @@ public class PreOrderController {
     @Operation(summary = "Get pre-orders by status")
     public ResponseEntity<List<PreOrderResponse>> getPreOrdersByStatus(
             @Parameter(description = "Pre-order status", example = "PENDING")
-            @RequestParam PreOrderStatus status) {
+            @PathVariable PreOrderStatus status) {
         return ResponseEntity.ok(preOrderService.getAllPreOrdersByStatus(status));
     }
 }
