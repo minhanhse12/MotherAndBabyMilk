@@ -34,6 +34,9 @@ public class Order {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @Column(name = "vnpay_txn_ref")
+    private String vnpayTxnRef;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OrderStatus status = OrderStatus.PENDING;

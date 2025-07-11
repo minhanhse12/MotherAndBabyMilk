@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByIsDeleteFalse();
+    Optional<Order> findByVnpayTxnRef(String vnpayTxnRef);
     List<Order> findAllByStatus(OrderStatus status);
     Optional<Order> findByIdAndIsDeleteFalse(int id);
 }
