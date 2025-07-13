@@ -149,6 +149,22 @@ public class OrderService {
     }
 
     @Transactional
+    public List<OrderResponse> getOrdersByUserId(int userId) {
+        // Kiểm tra user có tồn tại không
+        Users user = userRepository.findUsersById(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with ID: " + userId);
+        }
+
+        // Lấy danh sách orders theo userId
+        List<Order> orders = orderRepository.findByUserIdAndIsDeleteFalse(userId);
+
+        return orders.stream()
+                .map(this::convertToOrderResponse)
+                .toList();
+    }
+
+    @Transactional
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepository.findByIsDeleteFalse();
         return orders.stream()
@@ -177,6 +193,11 @@ public class OrderService {
 
     private OrderResponse convertToOrderResponse(Order order) {
         OrderResponse response = modelMapper.map(order, OrderResponse.class);
+
+        // Set username từ User entity
+        if (order.getUser() != null) {
+            response.setFullName(order.getUser().getFullName());
+        }
 
         // Convert OrderItems to OrderItemResponse
         List<OrderItemResponse> orderItemResponses = new ArrayList<>();
