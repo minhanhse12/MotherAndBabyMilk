@@ -207,6 +207,15 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
+    public Users findByUsername(String username) {
+        Users user = userRepository.findUsersByUsername(username);
+        if (user == null) {
+            throw new EntityNotFoundException("User with username " + username + " not found!");
+        }
+        return user;
+    }
+
+
     public UpdateResponse getCurrentUserInfo() {
         Users currentUser = this.getCurrentAccount();
         if (currentUser == null) {

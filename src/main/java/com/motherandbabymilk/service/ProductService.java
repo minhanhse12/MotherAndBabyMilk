@@ -47,13 +47,20 @@ public class ProductService {
         product.setDelete(false);
         Product savedProduct = productRepository.save(product);
 
-        return modelMapper.map(savedProduct, ProductResponse.class);
+        ProductResponse response = modelMapper.map(savedProduct, ProductResponse.class);
+        response.setBrandName(brand.getName());
+        response.setCategoryName(category.getName());
+        return response;
     }
+
     @Transactional
     public ProductResponse getProductById(int id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
-        return modelMapper.map(product, ProductResponse.class);
+        ProductResponse response = modelMapper.map(product, ProductResponse.class);
+        response.setBrandName(product.getBrand().getName());
+        response.setCategoryName(product.getCategory().getName());
+        return response;
     }
 
     @Transactional
@@ -67,7 +74,12 @@ public class ProductService {
 
         List<Product> products = productRepository.findAllNotDelete();
         return products.stream()
-                .map(product -> modelMapper.map(product, ProductResponse.class))
+                .map(product -> {
+                    ProductResponse response = modelMapper.map(product, ProductResponse.class);
+                    response.setBrandName(product.getBrand().getName());
+                    response.setCategoryName(product.getCategory().getName());
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -82,7 +94,10 @@ public class ProductService {
         modelMapper.map(request, product);
         product.setId(id);
         Product updatedProduct = productRepository.save(product);
-        return modelMapper.map(updatedProduct, ProductResponse.class);
+        ProductResponse response = modelMapper.map(updatedProduct, ProductResponse.class);
+        response.setBrandName(updatedProduct.getBrand().getName());
+        response.setCategoryName(updatedProduct.getCategory().getName());
+        return response;
     }
 
     @Transactional
