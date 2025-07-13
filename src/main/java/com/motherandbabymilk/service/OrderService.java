@@ -1,13 +1,16 @@
 package com.motherandbabymilk.service;
 
 import com.motherandbabymilk.dto.request.OrderRequest;
+import com.motherandbabymilk.dto.response.OrderItemResponse;
 import com.motherandbabymilk.dto.response.OrderResponse;
 import com.motherandbabymilk.entity.*;
 import com.motherandbabymilk.exception.EntityNotFoundException;
+import com.motherandbabymilk.exception.IllegalStateException;
 import com.motherandbabymilk.repository.*;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 
 @Service
 public class OrderService {
@@ -38,9 +42,22 @@ public class OrderService {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
     @Transactional
-    public OrderResponse placeOrderFromCart(int userId) {
-        Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
+    public OrderResponse placeOrderFromCart(int userId, String address) {
+        // Validate address
+        if (address == null || address.trim().isEmpty()) {
+            throw new IllegalArgumentException("Address is required");
+        }
+
+        Users user = userRepository.findUsersById(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        // Lấy cart duy nhất của user
+        Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
 
         List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
@@ -52,14 +69,14 @@ public class OrderService {
             throw new IllegalStateException("No selected items in cart");
         }
 
-        Users user = userRepository.findUsersById(userId);
-        if (user == null) {
-            throw new EntityNotFoundException("User not found");
+        if ("pending_order".equals(cart.getStatus())) {
+            throw new IllegalStateException("Cart is already being processed for another order");
         }
 
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
+        order.setAddress(address.trim());
 
         List<OrderItem> orderItems = new ArrayList<>();
         double total = 0;
@@ -80,7 +97,7 @@ public class OrderService {
             total += ci.getTotalPrice();
         }
 
-        Date paymentDeadline = new Date(System.currentTimeMillis() + 5 * 60 * 1000); 
+        Date paymentDeadline = new Date(System.currentTimeMillis() + 5 * 60 * 1000);
         order.setPaymentDeadline(paymentDeadline);
         order.setStatus(OrderStatus.PENDING);
         order.setTotalAmount(total);
@@ -88,15 +105,13 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        cart.setStatus("ordered");
+        // Đặt cart thành trạng thái pending order
+        cart.setStatus("pending_order");
+        cart.setLastOrderId(savedOrder.getId()); // Lưu order ID để tracking
         cart.setUpdatedAt(LocalDateTime.now());
         cartRepository.save(cart);
 
-        selectedItems.forEach(item -> {
-            item.setDelete(true);
-            cartItemRepository.save(item);
-        });
-
+        // Schedule task để hủy order nếu không thanh toán trong 5 phút
         long delayMillis = 5 * 60 * 1000;
         scheduler.schedule(() -> {
             Optional<Order> optionalOrder = orderRepository.findById(savedOrder.getId());
@@ -109,125 +124,51 @@ public class OrderService {
                     o.setStatus(OrderStatus.CANCELED);
                     orderRepository.save(o);
 
-                    Cart canceledCart = cartRepository.findById(cart.getId()).orElse(null);
-                    if (canceledCart != null) {
-                        canceledCart.setStatus("active");
-                        canceledCart.setUpdatedAt(LocalDateTime.now());
-                        cartRepository.save(canceledCart);
-
-                        List<CartItem> deletedItems = cartItemRepository.findByCartIdAndIsDeleteTrue(canceledCart.getId())
-                                .stream()
-                                .filter(CartItem::isDelete)
-                                .toList();
-
-                        deletedItems.forEach(item -> {
-                            item.setDelete(false);
-                            cartItemRepository.save(item);
-                        });
+                    // Khôi phục cart về trạng thái active
+                    Cart timeoutCart = cartRepository.findByUserId(userId).orElse(null);
+                    if (timeoutCart != null) {
+                        timeoutCart.setStatus("active");
+                        timeoutCart.setLastOrderId(0);
+                        timeoutCart.setUpdatedAt(LocalDateTime.now());
+                        cartRepository.save(timeoutCart);
                     }
+
+                    logger.info("Order {} canceled due to payment timeout", o.getId());
                 }
             }
         }, delayMillis, TimeUnit.MILLISECONDS);
 
-        return modelMapper.map(savedOrder, OrderResponse.class);
+        return convertToOrderResponse(savedOrder);
     }
-
-
-
-//    @Transactional
-//    public OrderResponse placeOrderFromCart(int userId) {
-//        Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
-//                .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
-//
-//        List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
-//                .stream()
-//                .filter(CartItem::isSelect)
-//                .toList();
-//
-//        if (selectedItems.isEmpty()) {
-//            throw new IllegalStateException("No selected items in cart");
-//        }
-//
-//        Users user = userRepository.findUsersById(userId);
-//        if (user == null) {
-//            throw new EntityNotFoundException("User not found");
-//        }
-//
-//        Order order = new Order();
-//        order.setUser(user);
-//        order.setOrderDate(LocalDateTime.now());
-//
-//        List<OrderItem> orderItems = new ArrayList<>();
-//        double total = 0;
-//
-//        for (CartItem ci : selectedItems) {
-//
-//            Product product = ci.getProduct();
-//            if (product.getQuantity() < ci.getQuantity()) {
-//                throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
-//            }
-//
-//            OrderItem item = new OrderItem();
-//            item.setOrder(order);
-//            item.setProductId(product);
-//            item.setQuantity(ci.getQuantity());
-//            item.setTotalAmount(ci.getUnitPrice());
-//            orderItems.add(item);
-//
-//            total += ci.getTotalPrice();
-//        }
-//
-//        Date paymentDeadline = new Date(System.currentTimeMillis() + 5 * 1000 * 60);
-//        order.setPaymentDeadline(paymentDeadline);
-//        order.setStatus(OrderStatus.PENDING);
-//
-//        order.setTotalAmount(total);
-//        order.setOrderItems(orderItems);
-//        Order savedOrder = orderRepository.save(order);
-//
-//        cart.setStatus("ordered");
-//        cart.setUpdatedAt(LocalDateTime.now());
-//        cartRepository.save(cart);
-//
-//        selectedItems.forEach(item -> {
-//            item.setDelete(true);
-//            cartItemRepository.save(item);
-//        });
-//
-//        return modelMapper.map(savedOrder, OrderResponse.class);
-//    }
-//
-//    @Scheduled(fixedRate = 60000)
-//    @Transactional
-//    public void checkAndCancelExpiredOrders() {
-//        cancelExpiredOrders();
-//    }
-//
-//    @Transactional
-//    public void cancelExpiredOrders() {
-//        List<Order> expiredOrders = orderRepository.findAllByStatus(OrderStatus.PENDING)
-//                .stream()
-//                .filter(order -> order.getPaymentDeadline() != null && order.getPaymentDeadline().before(new Date()))
-//                .toList();
-//
-//        for (Order order : expiredOrders) {
-//            order.setStatus(OrderStatus.CANCELED);
-//            orderRepository.save(order);
-//        }
-//    }
 
     @Transactional
     public OrderResponse getOrder(int orderId) {
         Order order = orderRepository.findByIdAndIsDeleteFalse(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-        return modelMapper.map(order, OrderResponse.class);
+        return convertToOrderResponse(order);
+    }
+
+    @Transactional
+    public List<OrderResponse> getOrdersByUserId(int userId) {
+        // Kiểm tra user có tồn tại không
+        Users user = userRepository.findUsersById(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with ID: " + userId);
+        }
+
+        // Lấy danh sách orders theo userId
+        List<Order> orders = orderRepository.findByUserIdAndIsDeleteFalse(userId);
+
+        return orders.stream()
+                .map(this::convertToOrderResponse)
+                .toList();
     }
 
     @Transactional
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepository.findByIsDeleteFalse();
         return orders.stream()
-                .map(order -> modelMapper.map(order, OrderResponse.class))
+                .map(this::convertToOrderResponse)
                 .toList();
     }
 
@@ -239,7 +180,7 @@ public class OrderService {
         order.setTotalAmount(request.getTotalAmount());
 
         Order updatedOrder = orderRepository.save(order);
-        return modelMapper.map(updatedOrder, OrderResponse.class);
+        return convertToOrderResponse(updatedOrder);
     }
 
     @Transactional
@@ -248,5 +189,34 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         order.setDelete(true);
         orderRepository.save(order);
+    }
+
+    private OrderResponse convertToOrderResponse(Order order) {
+        OrderResponse response = modelMapper.map(order, OrderResponse.class);
+
+        // Set username từ User entity
+        if (order.getUser() != null) {
+            response.setFullName(order.getUser().getFullName());
+        }
+
+        // Convert OrderItems to OrderItemResponse
+        List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+        for (OrderItem orderItem : order.getOrderItems()) {
+            Product product = orderItem.getProductId();
+
+            OrderItemResponse itemResponse = new OrderItemResponse();
+            itemResponse.setId(orderItem.getId());
+            itemResponse.setProductId(product.getId());
+            itemResponse.setProductName(product.getName());
+            itemResponse.setQuantity(orderItem.getQuantity());
+            itemResponse.setUnitPrice(product.getPrice()); // Sử dụng giá từ Product
+            itemResponse.setTotalPrice(product.getPrice() * orderItem.getQuantity());
+            itemResponse.setImage(product.getImage());
+
+            orderItemResponses.add(itemResponse);
+        }
+
+        response.setOrderItems(orderItemResponses);
+        return response;
     }
 }

@@ -32,7 +32,10 @@ public class Order {
     private double totalAmount;
 
     @Column(name = "address", nullable = false)
-    private double address;
+    private String address;
+
+    @Column(name = "vnpay_txn_ref")
+    private String vnpayTxnRef;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

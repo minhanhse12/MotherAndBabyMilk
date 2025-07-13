@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+
 @Table(name = "pre_orders")
+
 public class PreOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

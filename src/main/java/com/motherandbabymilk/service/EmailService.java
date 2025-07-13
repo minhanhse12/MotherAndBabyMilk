@@ -74,6 +74,24 @@ public class EmailService {
                     template = templateEngine.process("preorder-fulfilled-template", context);
                     break;
 
+                case "preOrderConfirmation":
+                    context.setVariable("title", "Pre-Order Confirmation");
+                    context.setVariable("mainMessage", "Your pre-order has been confirmed. Please proceed with payment.");
+                    context.setVariable("actionUrl", emailDetail.getLink());
+                    context.setVariable("actionText", "Proceed to Payment");
+                    context.setVariable("companyName", "MnBMilk");
+                    template = templateEngine.process("preorder-confirmation-template", context);
+                    break;
+
+                case "preOrderFulfilled":
+                    context.setVariable("title", "Pre-Order Fulfilled");
+                    context.setVariable("mainMessage", "Your pre-order has been canceled!");
+                    context.setVariable("actionUrl", emailDetail.getLink());
+                    context.setVariable("actionText", "View Pre-Orders");
+                    context.setVariable("companyName", "MnBMilk");
+                    template = templateEngine.process("preorder-canceled-template", context);
+                    break;
+
                 default:
                     throw new MessagingException("Invalid Email Type");
             }

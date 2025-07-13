@@ -21,8 +21,11 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping("/place/{userId}")
-    public ResponseEntity<OrderResponse> placeOrderFromCart(@PathVariable int userId) {
-        OrderResponse response = orderService.placeOrderFromCart(userId);
+    public ResponseEntity<OrderResponse> placeOrderFromCart(
+            @PathVariable int userId,
+            @RequestParam String address) {
+
+        OrderResponse response = orderService.placeOrderFromCart(userId, address);
         return ResponseEntity.ok(response);
     }
 
@@ -30,6 +33,17 @@ public class OrderController {
     public ResponseEntity<OrderResponse> getOrder(@PathVariable int orderId) {
         OrderResponse response = orderService.getOrder(orderId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getOrderbyUserId/{userId}")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN', 'STAFF')")
+    public ResponseEntity<?> getOrdersByUserId(@PathVariable int userId) {
+        try {
+            List<OrderResponse> orders = orderService.getOrdersByUserId(userId);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error getting user orders: " + e.getMessage());
+        }
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")

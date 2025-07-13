@@ -32,5 +32,7 @@ public class Cart {
     @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)
     private Users user;
 
+    @Column(name = "last_order_id")
+    private Integer lastOrderId;
 }
 

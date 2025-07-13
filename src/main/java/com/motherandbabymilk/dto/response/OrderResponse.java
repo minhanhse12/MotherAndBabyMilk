@@ -10,6 +10,7 @@ import java.util.List;
 public class OrderResponse {
     private int id;
     private int userId;
+    private String fullName;
     private LocalDateTime orderDate;
     private LocalDateTime paidAt;
     private double totalAmount;

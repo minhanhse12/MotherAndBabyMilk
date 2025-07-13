@@ -86,13 +86,12 @@ public class FeedbackController {
         return ResponseEntity.ok(response);
     }
 
-    // Approve feedback (cho admin)
-//    @PutMapping("/{id}/approve")
-//    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
-//    public ResponseEntity<FeedbackResponse> approveFeedback(@PathVariable("id") int id) {
-//        FeedbackResponse response = feedbackService.approveFeedback(id);
-//        return ResponseEntity.ok(response);
-//    }
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
+    public ResponseEntity<FeedbackResponse> approveFeedback(@PathVariable("id") int id) {
+        FeedbackResponse response = feedbackService.approveFeedback(id);
+        return ResponseEntity.ok(response);
+    }
 //
 //    // Reject feedback (cho admin)
 //    @PutMapping("/{id}/reject")

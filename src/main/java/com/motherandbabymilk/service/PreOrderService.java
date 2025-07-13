@@ -90,13 +90,14 @@ public class PreOrderService {
             emailDetail.setLink(paymentUrl + "?preOrderId=" + preOrderId);
             emailService.sendEmail(emailDetail, "preOrderConfirmation");
 
-        } else if (status == PreOrderStatus.FULFILLED) {
+
+        } else if (status == PreOrderStatus.CANCELED) {
             preOrder.setFulfilledAt(now);
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(preOrder.getUser());
-            emailDetail.setSubject("Pre-Order Fulfilled");
+            emailDetail.setSubject("Pre-Order has Canceled");
             emailDetail.setLink(paymentUrl);
-            emailService.sendEmail(emailDetail, "preOrderFulfilled");
+            emailService.sendEmail(emailDetail, "preOrderCanceled");
         }
 
         PreOrder updatedPreOrder = preOrderRepository.save(preOrder);
