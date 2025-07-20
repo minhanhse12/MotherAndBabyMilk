@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "c ")
+@Table(name = "preorder")
 public class PreOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,9 +24,6 @@ public class PreOrder {
     @Column(nullable = false)
     private int quantity;
 
-    @Column
-    private String note;
-
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -34,9 +31,12 @@ public class PreOrder {
     @Column(nullable = false)
     private PreOrderStatus status;
 
+    @Column(name = "vnpay_txn_ref")
+    private String vnpayTxnRef;
+
     @Column
     private LocalDateTime confirmedAt;
 
-    @Column
-    private LocalDateTime fulfilledAt;
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
 }

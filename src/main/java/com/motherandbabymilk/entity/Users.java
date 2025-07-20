@@ -46,6 +46,9 @@ public class Users implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Roles roles;
 
+    @Column(name = "loyalty_points")
+    private int loyaltyPoints = 0;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();

@@ -15,6 +15,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;

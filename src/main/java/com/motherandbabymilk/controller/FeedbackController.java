@@ -61,22 +61,6 @@ public class FeedbackController {
         return ResponseEntity.ok(response);
     }
 
-    // Lấy feedback đã được approve theo product ID (public)
-//    @GetMapping("/product/{productId}/approved")
-//    public ResponseEntity<List<FeedbackResponse>> getApprovedFeedbacksByProductId(@PathVariable("productId") int productId) {
-//        List<FeedbackResponse> response = feedbackService.getApprovedFeedbacksByProductId(productId);
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    // Lấy feedback chưa được approve (cho admin)
-//    @GetMapping("/pending")
-//    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
-//    public ResponseEntity<List<FeedbackResponse>> getPendingFeedbacks() {
-//        List<FeedbackResponse> response = feedbackService.getPendingFeedbacks();
-//        return ResponseEntity.ok(response);
-//    }
-
-    // Cập nhật feedback
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN', 'STAFF')")
     public ResponseEntity<FeedbackResponse> updateFeedback(
@@ -92,16 +76,7 @@ public class FeedbackController {
         FeedbackResponse response = feedbackService.approveFeedback(id);
         return ResponseEntity.ok(response);
     }
-//
-//    // Reject feedback (cho admin)
-//    @PutMapping("/{id}/reject")
-//    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
-//    public ResponseEntity<FeedbackResponse> rejectFeedback(@PathVariable("id") int id) {
-//        FeedbackResponse response = feedbackService.rejectFeedback(id);
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    // Xóa feedback
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<String> deleteFeedback(@PathVariable("id") int id) {

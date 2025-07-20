@@ -215,4 +215,11 @@ public class UserService implements UserDetailsService {
             return this.modelMapper.map(currentUser, UpdateResponse.class);
         }
     }
+    public int getLoyaltyPoint(int userId) {
+        Users user = userRepository.findUsersById(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found");
+        }
+        return user.getLoyaltyPoints();
+    }
 }

@@ -26,4 +26,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAuth(AuthException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
+
+    @ExceptionHandler(ProductInStockException.class)
+    public ResponseEntity<String> handleProductInStock(ProductInStockException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CartAlreadyProcessingException.class)
+    public ResponseEntity<String> handleCartAlreadyProcessing(CartAlreadyProcessingException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }
