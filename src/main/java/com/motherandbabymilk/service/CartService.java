@@ -3,6 +3,7 @@ package com.motherandbabymilk.service;
 import com.motherandbabymilk.dto.request.CartRequest;
 import com.motherandbabymilk.dto.response.CartItemResponse;
 import com.motherandbabymilk.dto.response.CartResponse;
+import com.motherandbabymilk.dto.response.CartOperationResponse;
 import com.motherandbabymilk.entity.Cart;
 import com.motherandbabymilk.entity.CartItem;
 import com.motherandbabymilk.entity.Product;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
-
 
 @Service
 public class CartService {
@@ -46,15 +46,18 @@ public class CartService {
     private ModelMapper modelMapper;
 
     @Transactional
-    public CartResponse addToCart(int userId, @Valid CartRequest request) {
+    public CartOperationResponse addToCart(int userId, @Valid CartRequest request) {
         Users user = userRepository.findUsersById(userId);
         if (user == null) {
-            throw new EntityNotFoundException("User with ID " + userId + " not found");
+            return new CartOperationResponse(false, "User with ID " + userId + " not found");
         }
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("Product with ID " + request.getProductId() + " not found"));
+                .orElse(null);
+        if (product == null) {
+            return new CartOperationResponse(false, "Product with ID " + request.getProductId() + " not found");
+        }
         if (product.getQuantity() < request.getQuantity()) {
-            throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
+            return new CartOperationResponse(false, "Insufficient stock for product " + product.getName() + ". Available: " + product.getQuantity());
         }
 
         Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
@@ -71,7 +74,7 @@ public class CartService {
                 .orElse(new CartItem());
         int newQuantity = cartItem.getQuantity() + request.getQuantity();
         if (product.getQuantity() < newQuantity) {
-            throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
+            return new CartOperationResponse(false, "Insufficient stock for product " + product.getName() + ". Available: " + product.getQuantity());
         }
 
         cartItem.setCart(cart);
@@ -86,20 +89,28 @@ public class CartService {
 
         updateCartTotalPrice(cart);
         logger.info("Added product ID {} to cart ID {}", product.getId(), cart.getId());
-        return getCart(userId);
+        return new CartOperationResponse(true, "Product " + product.getName() + " added to cart successfully", getCart(userId));
     }
 
     @Transactional
-    public CartResponse updateCartItem(int userId, int productId, @Min(value = 1, message = "Quantity must be at least 1") int quantity) {
+    public CartOperationResponse updateCartItem(int userId, int productId, @Min(value = 1, message = "Quantity must be at least 1") int quantity) {
         Cart cart = cartRepository.findByUserIdAndStatus(userId, "active")
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
+                .orElse(null);
+        if (cart == null) {
+            return new CartOperationResponse(false, "Cart not found for user ID " + userId);
+        }
         CartItem cartItem = cartItemRepository.findByCartIdAndProductIdAndIsDeleteFalse(cart.getId(), productId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart item not found for product ID " + productId));
+                .orElse(null);
+        if (cartItem == null) {
+            return new CartOperationResponse(false, "Cart item not found for product ID " + productId);
+        }
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product with ID " + productId + " not found"));
-
+                .orElse(null);
+        if (product == null) {
+            return new CartOperationResponse(false, "Product with ID " + productId + " not found");
+        }
         if (product.getQuantity() < quantity) {
-            throw new IllegalArgumentException("Insufficient stock for product ID " + productId);
+            return new CartOperationResponse(false, "Insufficient stock for product " + product.getName() + ". Available: " + product.getQuantity());
         }
 
         cartItem.setQuantity(quantity);
@@ -109,7 +120,7 @@ public class CartService {
 
         updateCartTotalPrice(cart);
         logger.info("Updated cart item for product ID {} in cart ID {}", productId, cart.getId());
-        return getCart(userId);
+        return new CartOperationResponse(true, "Cart item updated successfully", getCart(userId));
     }
 
     @Transactional
@@ -132,22 +143,8 @@ public class CartService {
 
         CartResponse response = new CartResponse();
         response.setUserId(userId);
-
         response.setCartItems(cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId()).stream()
-
-                .map(item -> {
-                    CartItemResponse itemResponse = new CartItemResponse();
-                    itemResponse.setId((int) item.getId());
-                    itemResponse.setProductId(item.getProduct().getId());
-                    itemResponse.setProductName(item.getProduct().getName());
-                    itemResponse.setQuantity(item.getQuantity());
-                    itemResponse.setUnitPrice(item.getUnitPrice());
-                    itemResponse.setTotalPrice(item.getTotalPrice());
-                    itemResponse.setNote(item.getNote());
-                    itemResponse.setSelected(item.isSelect());
-                    itemResponse.setImage(item.getProduct().getImage());
-                    return itemResponse;
-                })
+                .map(item -> modelMapper.map(item, CartItemResponse.class))
                 .collect(Collectors.toList()));
         response.setTotalPrice(cart.getTotalPrice());
         response.setStatus(cart.getStatus());

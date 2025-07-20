@@ -90,6 +90,7 @@ public class PreOrderService {
             emailDetail.setLink(paymentUrl + "?preOrderId=" + preOrderId);
             emailService.sendEmail(emailDetail, "preOrderConfirmation");
 
+
         } else if (status == PreOrderStatus.CANCELED) {
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(preOrder.getUser());

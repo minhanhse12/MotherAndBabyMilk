@@ -63,7 +63,7 @@ public class ArticleService{
     }
     public void deleteArticle(int id) {
         Article article = articlesRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Article with ID " + id + " not found"));
         article.setDelete(true);
         articlesRepository.save(article);
     }

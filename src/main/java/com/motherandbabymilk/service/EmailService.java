@@ -4,6 +4,7 @@ import com.motherandbabymilk.dto.EmailDetail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -17,18 +18,21 @@ public class EmailService {
     @Autowired
     JavaMailSender javaMailSender;
 
+    @Value("${spring.mail.username}")
+    private String senderEmail;
+
     public void sendEmail(EmailDetail emailDetail, String emailType) {
         try {
             Context context = new Context();
-            String template = "";
+            String template;
 
             switch (emailType) {
                 case "registration":
                     context.setVariable("title", "Welcome! " + emailDetail.getReceiver().getUsername());
                     context.setVariable("mainMessage", "Thank you for joining us. We're excited to have you on board!");
-                    context.setVariable("actionUrl", "http://localhost:5173/");
+                    context.setVariable("actionUrl", emailDetail.getLink());
                     context.setVariable("actionText", "Get Started");
-                    template = this.templateEngine.process("email-template", context);
+                    template = templateEngine.process("email-template", context);
                     break;
 
                 case "orderCancellation":
@@ -36,20 +40,38 @@ public class EmailService {
                     context.setVariable("customerName", emailDetail.getReceiver().getUsername());
                     context.setVariable("mainMessage", "Your order has been cancelled.");
                     context.setVariable("reason", emailDetail.getReason());
-                    context.setVariable("actionUrl", "http://localhost:5173/");
+                    context.setVariable("actionUrl", emailDetail.getLink());
                     context.setVariable("actionText", "View Orders");
                     context.setVariable("companyName", "MnBMilk");
                     context.setVariable("companyAddress", "566 Vo Van Ngan Street, HCM City, VietNam");
-                    template = this.templateEngine.process("cancel-template", context);
+                    template = templateEngine.process("cancel-template", context);
                     break;
 
                 case "resetPassword":
                     context.setVariable("title", "Password Reset Request");
                     context.setVariable("mainMessage", "We received a request to reset your password.");
-                    context.setVariable("actionUrl", "http://localhost:5173/reset-password?token=" + emailDetail.getToken());
+                    context.setVariable("actionUrl", emailDetail.getLink());
                     context.setVariable("actionText", "Reset Password");
                     context.setVariable("companyName", "MnBMilk");
-                    template = this.templateEngine.process("reset-password-template", context);
+                    template = templateEngine.process("reset-password-template", context);
+                    break;
+
+                case "preOrderConfirmation":
+                    context.setVariable("title", "Pre-Order Confirmation");
+                    context.setVariable("mainMessage", "Your pre-order has been confirmed. Please proceed with payment.");
+                    context.setVariable("actionUrl", emailDetail.getLink());
+                    context.setVariable("actionText", "Proceed to Payment");
+                    context.setVariable("companyName", "MnBMilk");
+                    template = templateEngine.process("preorder-confirmation-template", context);
+                    break;
+
+                case "preOrderFulfilled":
+                    context.setVariable("title", "Pre-Order Fulfilled");
+                    context.setVariable("mainMessage", "Your pre-order has been fulfilled. Thank you for your purchase!");
+                    context.setVariable("actionUrl", emailDetail.getLink());
+                    context.setVariable("actionText", "View Pre-Orders");
+                    context.setVariable("companyName", "MnBMilk");
+                    template = templateEngine.process("preorder-fulfilled-template", context);
                     break;
 
                 case "preOrderConfirmation":
@@ -74,15 +96,15 @@ public class EmailService {
                     throw new MessagingException("Invalid Email Type");
             }
 
-            MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
-            mimeMessageHelper.setFrom("minhanh0381672@gmail.com");
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+            mimeMessageHelper.setFrom(senderEmail);
             mimeMessageHelper.setTo(emailDetail.getReceiver().getUsername());
             mimeMessageHelper.setText(template, true);
             mimeMessageHelper.setSubject(emailDetail.getSubject());
-            this.javaMailSender.send(mimeMessage);
-        } catch (MessagingException var7) {
-            System.out.println("ERROR SENT MAIL!!");
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
 }

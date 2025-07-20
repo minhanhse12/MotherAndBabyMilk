@@ -49,6 +49,6 @@ public class BrandController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     public ResponseEntity<String> deleteBrand(@PathVariable("id") int id) {
         brandService.deleteBrand(id);
-        return ResponseEntity.ok("Product deleted successfully");
+        return ResponseEntity.ok("Brand deleted successfully");
     }
 }

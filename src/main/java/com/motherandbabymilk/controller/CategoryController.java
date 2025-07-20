@@ -49,6 +49,6 @@ public class CategoryController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteCategory(@PathVariable("id") int id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok("Product deleted successfully");
+        return ResponseEntity.ok("Category deleted successfully");
     }
 }
