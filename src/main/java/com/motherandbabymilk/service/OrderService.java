@@ -189,7 +189,6 @@ public OrderResponse placeOrderFromCart(int userId, String address, boolean useL
 
     double originalTotal = total;
 
-    // ✅ Dùng điểm để giảm giá
     int pointsUsed = 0;
     double discountAmount = 0;
 
@@ -199,7 +198,6 @@ public OrderResponse placeOrderFromCart(int userId, String address, boolean useL
         discountAmount = (maxDiscountPercent / 100.0) * total;
         total -= discountAmount;
 
-        // Trừ điểm người dùng (sau khi order được tạo)
         user.setLoyaltyPoints(user.getLoyaltyPoints() - (int) maxDiscountPercent);
         userRepository.save(user);
     }
@@ -211,7 +209,7 @@ public OrderResponse placeOrderFromCart(int userId, String address, boolean useL
 
     Order savedOrder = orderRepository.save(order);
 
-    // Cập nhật Cart
+
     cart.setStatus("pending_order");
     cart.setLastOrderId(savedOrder.getId());
     cart.setUpdatedAt(LocalDateTime.now());

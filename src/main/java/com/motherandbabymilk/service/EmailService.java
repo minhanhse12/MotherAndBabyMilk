@@ -50,7 +50,7 @@ public class EmailService {
                 case "resetPassword":
                     context.setVariable("title", "Password Reset Request");
                     context.setVariable("mainMessage", "We received a request to reset your password.");
-                    context.setVariable("actionUrl", emailDetail.getLink());
+                    context.setVariable("actionUrl","http://localhost:5173/reset-password?token=" + emailDetail.getToken());
                     context.setVariable("actionText", "Reset Password");
                     context.setVariable("companyName", "MnBMilk");
                     template = templateEngine.process("reset-password-template", context);
@@ -80,7 +80,7 @@ public class EmailService {
                     context.setVariable("actionUrl", emailDetail.getLink());
                     context.setVariable("actionText", "View Pre-Orders");
                     context.setVariable("companyName", "MnBMilk");
-                    template = templateEngine.process("preorder-canceled-template", context);
+                    template = templateEngine.process("cancel-template", context);
                     break;
 
                 default:

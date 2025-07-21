@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -84,7 +83,7 @@ public class TokenService {
         user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
         userRepository.save(user);
 
-        tokenRepository.delete(tokenOpt.get()); // Xoá token sau khi sử dụng
+        tokenRepository.delete(tokenOpt.get());
         return true;
     }
     public void invalidateToken(String token) {

@@ -169,7 +169,6 @@ public class UserService implements UserDetailsService {
     }
 
 
-
     public Users getCurrentAccount() {
         return (Users) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
