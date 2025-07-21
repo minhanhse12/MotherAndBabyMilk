@@ -7,7 +7,7 @@ public enum OrderStatus {
     PENDING,
     PAID,
     PROCESSING,
+    PACKAGING,
     COMPLETED,
     CANCELED,
-    APPROVED
 }
