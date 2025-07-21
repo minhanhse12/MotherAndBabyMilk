@@ -85,6 +85,7 @@ public class CartService {
         cartItem.setNote(request.getNote());
         cartItem.setAddedAt(LocalDateTime.now());
         cartItem.setSelect(true);
+        cartItem.setImage(product.getImage());
         cartItemRepository.save(cartItem);
 
         updateCartTotalPrice(cart);

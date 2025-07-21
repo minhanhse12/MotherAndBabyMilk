@@ -39,7 +39,7 @@ public class FeedbackController {
 
     // Lấy tất cả feedback
     @GetMapping("/getAll")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN', 'STAFF')")
     public ResponseEntity<List<FeedbackResponse>> getAllFeedbacks() {
         List<FeedbackResponse> response = feedbackService.getAllFeedbacks();
         return ResponseEntity.ok(response);

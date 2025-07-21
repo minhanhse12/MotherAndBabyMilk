@@ -74,15 +74,6 @@ public class EmailService {
                     template = templateEngine.process("preorder-fulfilled-template", context);
                     break;
 
-                case "preOrderConfirmation":
-                    context.setVariable("title", "Pre-Order Confirmation");
-                    context.setVariable("mainMessage", "Your pre-order has been confirmed. Please proceed with payment.");
-                    context.setVariable("actionUrl", emailDetail.getLink());
-                    context.setVariable("actionText", "Proceed to Payment");
-                    context.setVariable("companyName", "MnBMilk");
-                    template = templateEngine.process("preorder-confirmation-template", context);
-                    break;
-
                 case "preOrderCanceled":
                     context.setVariable("title", "Pre-Order Canceled");
                     context.setVariable("mainMessage", "Your pre-order has been canceled!");

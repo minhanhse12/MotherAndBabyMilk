@@ -38,8 +38,7 @@ public class TokenService {
 
     public String generateToken(Users user) {
         return Jwts.builder()
-                .subject(user.getUsername())
-                .claim("authorities", List.of(user.getRoles().name()))
+                .subject(user.getId() + "")
                 .issuedAt(new Date(System.currentTimeMillis())) //10:30
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSigninKey())
@@ -52,9 +51,10 @@ public class TokenService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        String username = claims.getSubject();
+        String idString = claims.getSubject();
+        int id = Integer.parseInt(idString);
 
-        return userRepository.findUsersByUsername(username);
+        return userRepository.findUsersById(id);
     }
 
     public boolean validateResetToken(String token) {
@@ -91,3 +91,4 @@ public class TokenService {
         tokenRepository.findByToken(token).ifPresent(tokenRepository::delete);
     }
 }
+
