@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pre-Order Rejection</title>
+</head>
+<body>
+<h1 th:text="${title}">Pre-Order Rejection</h1>
+<p th:text="${mainMessage}">Your pre-order has been rejected. </p>
+<a th:href="${actionUrl}" th:text="${actionText}">View Pre-Orders</a>
+<p th:text="'Company: ' + ${companyName}">Your Company</p>
+</body>
+</html>
