@@ -51,6 +51,12 @@ public class UserController {
         return ResponseEntity.ok(checkuser);
         }
 
+    @GetMapping("/{userId}/loyalty-point")
+    public ResponseEntity<Integer> getLoyaltyPoint(@PathVariable int userId) {
+        int point = userService.getLoyaltyPoint(userId);
+        return ResponseEntity.ok(point);
+    }
+
     @PostMapping("/logout")
     public String logout() {
         userService.logout();

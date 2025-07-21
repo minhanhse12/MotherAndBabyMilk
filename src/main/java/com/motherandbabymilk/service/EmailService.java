@@ -65,15 +65,6 @@ public class EmailService {
                     template = templateEngine.process("preorder-confirmation-template", context);
                     break;
 
-                case "preOrderCancelled":
-                    context.setVariable("title", "Pre-Order rejection");
-                    context.setVariable("mainMessage", "Your pre-order has been rejected.");
-                    context.setVariable("actionUrl", emailDetail.getLink());
-                    context.setVariable("actionText", "View Pre-Orders");
-                    context.setVariable("companyName", "MnBMilk");
-                    template = templateEngine.process("preorder-cancel-template", context);
-                    break;
-
                 case "preOrderFulfilled":
                     context.setVariable("title", "Pre-Order Fulfilled");
                     context.setVariable("mainMessage", "Your pre-order has been fulfilled. Thank you for your purchase!");
@@ -83,6 +74,14 @@ public class EmailService {
                     template = templateEngine.process("preorder-fulfilled-template", context);
                     break;
 
+                case "preOrderCanceled":
+                    context.setVariable("title", "Pre-Order Canceled");
+                    context.setVariable("mainMessage", "Your pre-order has been canceled!");
+                    context.setVariable("actionUrl", emailDetail.getLink());
+                    context.setVariable("actionText", "View Pre-Orders");
+                    context.setVariable("companyName", "MnBMilk");
+                    template = templateEngine.process("preorder-canceled-template", context);
+                    break;
 
                 default:
                     throw new MessagingException("Invalid Email Type");

@@ -14,6 +14,4 @@ public class PreOrderRequest {
     @Min(value = 1, message = "Quantity must be at least 1")
     private int quantity;
 
-    @Schema(description = "Note for pre-order", example = "Urgent delivery")
-    private String note;
 }

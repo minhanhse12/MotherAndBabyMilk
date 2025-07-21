@@ -54,7 +54,9 @@ public class Product {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
-        if (quantity == 0) {
+        if (quantity > 0) {
+            this.status = true;
+        } else {
             this.status = false;
         }
     }

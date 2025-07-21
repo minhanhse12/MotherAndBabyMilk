@@ -8,6 +8,7 @@ import com.motherandbabymilk.entity.PreOrderStatus;
 import com.motherandbabymilk.entity.Product;
 import com.motherandbabymilk.entity.Users;
 import com.motherandbabymilk.exception.EntityNotFoundException;
+import com.motherandbabymilk.exception.ProductInStockException;
 import com.motherandbabymilk.repository.PreOrderRepository;
 import com.motherandbabymilk.repository.ProductRepository;
 import com.motherandbabymilk.repository.UserRepository;
@@ -51,7 +52,7 @@ public class PreOrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + request.getProductId() + " not found"));
 
         if (product.getQuantity() > 0) {
-            throw new IllegalStateException("Product is in stock. Use cart instead.");
+            throw new ProductInStockException("Product is in stock. Use cart instead.");
         }
 
         boolean alreadyExists = preOrderRepository.existsByUserIdAndProductIdAndStatus(userId, request.getProductId(), PreOrderStatus.PENDING);
@@ -64,7 +65,6 @@ public class PreOrderService {
         preOrder.setUser(user);
         preOrder.setProduct(product);
         preOrder.setQuantity(request.getQuantity());
-        preOrder.setNote(request.getNote());
         preOrder.setStatus(PreOrderStatus.PENDING);
         preOrder.setCreatedAt(now);
 
@@ -92,7 +92,6 @@ public class PreOrderService {
 
 
         } else if (status == PreOrderStatus.CANCELED) {
-            preOrder.setFulfilledAt(now);
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(preOrder.getUser());
             emailDetail.setSubject("Pre-Order has Canceled");
@@ -119,6 +118,17 @@ public class PreOrderService {
 
     public List<PreOrderResponse> getAllPreOrdersByStatus(PreOrderStatus status) {
         return preOrderRepository.findByStatus(status)
+                .stream()
+                .map(preOrder -> {
+                    PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);
+                    response.setProductName(preOrder.getProduct().getName());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<PreOrderResponse> getAllPreOrders() {
+        return preOrderRepository.findAll()
                 .stream()
                 .map(preOrder -> {
                     PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);

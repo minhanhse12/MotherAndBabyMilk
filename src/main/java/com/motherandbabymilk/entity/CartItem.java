@@ -31,6 +31,9 @@ public class CartItem {
     @Column
     private String note;
 
+    @Column(name = "image", nullable = false)
+    private String image;
+
     @Column(nullable = false)
     private java.time.LocalDateTime addedAt;
 

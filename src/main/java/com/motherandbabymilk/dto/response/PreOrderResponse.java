@@ -23,9 +23,6 @@ public class PreOrderResponse {
     @Schema(description = "Quantity", example = "5")
     private int quantity;
 
-    @Schema(description = "Note", example = "Urgent delivery")
-    private String note;
-
     @Schema(description = "Status", example = "PENDING")
     private PreOrderStatus status;
 
@@ -35,6 +32,4 @@ public class PreOrderResponse {
     @Schema(description = "Confirmed at", example = "2025-06-28T10:00:00")
     private LocalDateTime confirmedAt;
 
-    @Schema(description = "Fulfilled at", example = "2025-06-28T12:00:00")
-    private LocalDateTime fulfilledAt;
 }

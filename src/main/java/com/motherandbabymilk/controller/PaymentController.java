@@ -32,5 +32,24 @@ public class PaymentController {
     public String vnpayCallback(@RequestParam(required = false) String url) {
         return paymentService.handleVnpayCallback(url);
     }
+
+    @PostMapping("/preorder/generate")
+    public ResponseEntity<String> generatePreOrderPayment(
+            @RequestParam int preOrderId,
+            HttpServletRequest request) {
+
+        String paymentUrl = paymentService.generatePreOrderPayment(preOrderId, request);
+        if (paymentUrl != null) {
+            return ResponseEntity.ok(paymentUrl);
+        } else {
+            return ResponseEntity.badRequest().body("Failed to generate VNPay URL for PreOrder");
+        }
+    }
+
+    @GetMapping("/preorder/callback")
+    public ResponseEntity<String> handlePreOrderVnpayCallback(@RequestParam(required = false) String url) {
+        String result = paymentService.handlePreOrderVnpayCallback(url);
+        return ResponseEntity.ok(result);
+    }
 }
 
