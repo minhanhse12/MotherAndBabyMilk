@@ -55,6 +55,13 @@ public class PreOrderController {
         return ResponseEntity.ok(preOrderService.getUserPreOrders(currentUser.getId()));
     }
 
+    @GetMapping("/getById/{id}")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'ADMIN', 'STAFF')")
+    @Operation(summary = "Get pre-order by ID")
+    public ResponseEntity<PreOrderResponse> getPreOrderById(@PathVariable int id) {
+        return ResponseEntity.ok(preOrderService.getPreOrderById(id));
+    }
+
     @GetMapping("/status/{status}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
     @Operation(summary = "Get pre-orders by status")

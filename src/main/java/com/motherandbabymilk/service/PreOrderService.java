@@ -137,4 +137,13 @@ public class PreOrderService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public PreOrderResponse getPreOrderById(int preOrderId) {
+        PreOrder preOrder = preOrderRepository.findById(preOrderId)
+                .orElseThrow(() -> new EntityNotFoundException("Pre-order with ID " + preOrderId + " not found"));
+
+        PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);
+        response.setProductName(preOrder.getProduct().getName());
+        return response;
+    }
 }
