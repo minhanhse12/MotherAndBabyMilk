@@ -126,4 +126,15 @@ public class PreOrderService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public List<PreOrderResponse> getAllPreOrders() {
+        return preOrderRepository.findAll()
+                .stream()
+                .map(preOrder -> {
+                    PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);
+                    response.setProductName(preOrder.getProduct().getName());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
 }

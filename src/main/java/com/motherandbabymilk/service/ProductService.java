@@ -87,13 +87,19 @@ public class ProductService {
     public ProductResponse updateProduct(int id, ProductRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
+
         Product existingProduct = productRepository.findByName(request.getName());
         if (existingProduct != null && existingProduct.getId() != id) {
             throw new DuplicateProductException("Product with name " + request.getName() + " already exists");
         }
+
         modelMapper.map(request, product);
         product.setId(id);
+
+        product.setQuantity(request.getQuantity());
+
         Product updatedProduct = productRepository.save(product);
+
         ProductResponse response = modelMapper.map(updatedProduct, ProductResponse.class);
         response.setBrandName(updatedProduct.getBrand().getName());
         response.setCategoryName(updatedProduct.getCategory().getName());

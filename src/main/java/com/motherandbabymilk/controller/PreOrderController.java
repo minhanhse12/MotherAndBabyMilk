@@ -63,4 +63,11 @@ public class PreOrderController {
             @PathVariable PreOrderStatus status) {
         return ResponseEntity.ok(preOrderService.getAllPreOrdersByStatus(status));
     }
+
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
+    @Operation(summary = "Get all pre-orders")
+    public ResponseEntity<List<PreOrderResponse>> getAllPreOrders() {
+        return ResponseEntity.ok(preOrderService.getAllPreOrders());
+    }
 }
