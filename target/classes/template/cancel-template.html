@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Cancellation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .content {
+            padding: 30px 20px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message-box {
+            background-color: #fff5f5;
+            border-left: 4px solid #ff4444;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .reason {
+            font-weight: bold;
+            color: #ff4444;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .order-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 5px 5px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 th:text="${title}">Order Cancellation Notification</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear <span th:text="${customerName}">Valued Customer</span>,</p>
+
+        <div class="message-box">
+            <p th:text="${mainMessage}">Your order has been cancelled.</p>
+            <p class="reason" th:if="${reason}" th:text="'Reason: ' + ${reason}">Reason: Out of stock</p>
+        </div>
+
+        <div class="order-details">
+            <h3>Order Details:</h3>
+            <p><strong>Order Created Date:</strong> <span th:text="${#temporals.format(orderCreatedDate, 'dd MMMM yyyy')}">01 January 2024</span>
+            <p><strong>Cancellation Date:</strong> <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMMM yyyy')}">01 January 2024</span></p>
+        </div>
+
+        <div style="text-align: center;">
+            <a th:href="${actionUrl}" th:text="${actionText}" class="button">View Orders</a>
+        </div>
+
+        <p style="margin-top: 20px;">If you have any questions about this cancellation, please contact our customer support team.</p>
+
+        <p style="margin-top: 15px;">
+            Best regards,<br>
+            <strong th:text="${companyName}">Your Company Name</strong>
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p th:text="${companyAddress}">123 Business Street, City, Country</p>
+        <p>&copy; <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2024</span>
+            <span th:text="${companyName}">Your Company</span>. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
