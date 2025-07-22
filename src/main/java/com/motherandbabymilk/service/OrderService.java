@@ -277,6 +277,17 @@ public OrderResponse placeOrderFromCart(int userId, String address, boolean useL
     }
 
     @Transactional
+    public OrderResponse updateOrderStatus(int orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findByIdAndIsDeleteFalse(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with ID: " + orderId));
+
+        order.setStatus(newStatus);
+        Order updatedOrder = orderRepository.save(order);
+
+        return convertToOrderResponse(updatedOrder);
+    }
+
+    @Transactional
     public OrderResponse updateOrder(int orderId, OrderRequest request) {
         Order order = orderRepository.findByIdAndIsDeleteFalse(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -298,12 +309,10 @@ public OrderResponse placeOrderFromCart(int userId, String address, boolean useL
     private OrderResponse convertToOrderResponse(Order order) {
         OrderResponse response = modelMapper.map(order, OrderResponse.class);
 
-        // Set username từ User entity
         if (order.getUser() != null) {
             response.setFullName(order.getUser().getFullName());
         }
 
-        // Convert OrderItems to OrderItemResponse
         List<OrderItemResponse> orderItemResponses = new ArrayList<>();
         for (OrderItem orderItem : order.getOrderItems()) {
             Product product = orderItem.getProductId();

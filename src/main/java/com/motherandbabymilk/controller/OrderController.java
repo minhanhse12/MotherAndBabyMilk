@@ -2,6 +2,7 @@ package com.motherandbabymilk.controller;
 
 import com.motherandbabymilk.dto.request.OrderRequest;
 import com.motherandbabymilk.dto.response.OrderResponse;
+import com.motherandbabymilk.entity.OrderStatus;
 import com.motherandbabymilk.service.OrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,16 @@ public class OrderController {
     public ResponseEntity<String> deleteOrder(@PathVariable int orderId) {
         orderService.deleteOrder(orderId);
         return ResponseEntity.ok("Order has been deleted.");
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<OrderResponse> updateOrderStatus(
+            @PathVariable int orderId,
+            @RequestParam OrderStatus status) {
+
+        OrderResponse response = orderService.updateOrderStatus(orderId, status);
+        return ResponseEntity.ok(response);
     }
 }
 
