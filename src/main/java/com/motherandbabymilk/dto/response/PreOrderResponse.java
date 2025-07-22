@@ -17,6 +17,10 @@ public class PreOrderResponse {
     @Schema(description = "Product ID", example = "1")
     private int productId;
 
+    private double unitPrice;
+    private double totalAmount;
+    private String image;
+
     @Schema(description = "Product name", example = "Organic Milk")
     private String productName;
 

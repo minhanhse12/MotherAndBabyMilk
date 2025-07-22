@@ -139,7 +139,7 @@ public class PaymentService {
             vnpParams.put("vnp_TxnRef", txnRef);
             vnpParams.put("vnp_OrderInfo", "Payment for pre-order " + preOrderId + " - " + product.getName());
             vnpParams.put("vnp_OrderType", "preorder");
-            vnpParams.put("vnp_Amount", String.valueOf((int) (totalAmount * 100))); // Convert to VND in cents
+            vnpParams.put("vnp_Amount", String.valueOf((int) (totalAmount * 100)));
             vnpParams.put("vnp_ReturnUrl", "http://localhost:5173/preorder-payment-result");
             vnpParams.put("vnp_IpAddr", ipAddress);
             vnpParams.put("vnp_CreateDate", getCurrentDate());
@@ -322,6 +322,7 @@ public class PaymentService {
 
         paymentRepository.save(payment);
         Users user = order.getUser();
+
         int pointsEarned = (int) (amount / 400_000);
         if (pointsEarned > 0) {
             user.setLoyaltyPoints(user.getLoyaltyPoints() + pointsEarned);

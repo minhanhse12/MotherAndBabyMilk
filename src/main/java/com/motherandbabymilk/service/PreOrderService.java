@@ -64,13 +64,16 @@ public class PreOrderService {
         PreOrder preOrder = new PreOrder();
         preOrder.setUser(user);
         preOrder.setProduct(product);
+        preOrder.setUnitPrice(product.getPrice());
         preOrder.setQuantity(request.getQuantity());
+        preOrder.setTotalAmount(preOrder.getTotalAmount());
         preOrder.setStatus(PreOrderStatus.PENDING);
         preOrder.setCreatedAt(now);
 
         PreOrder savedPreOrder = preOrderRepository.save(preOrder);
         PreOrderResponse response = modelMapper.map(savedPreOrder, PreOrderResponse.class);
         response.setProductName(product.getName());
+        response.setImage(product.getImage());
         return response;
     }
 
@@ -111,6 +114,7 @@ public class PreOrderService {
                 .map(preOrder -> {
                     PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);
                     response.setProductName(preOrder.getProduct().getName());
+                    response.setImage(preOrder.getProduct().getImage());
                     return response;
                 })
                 .collect(Collectors.toList());
@@ -122,6 +126,7 @@ public class PreOrderService {
                 .map(preOrder -> {
                     PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);
                     response.setProductName(preOrder.getProduct().getName());
+                    response.setImage(preOrder.getProduct().getImage());
                     return response;
                 })
                 .collect(Collectors.toList());
@@ -133,6 +138,7 @@ public class PreOrderService {
                 .map(preOrder -> {
                     PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);
                     response.setProductName(preOrder.getProduct().getName());
+                    response.setImage(preOrder.getProduct().getImage());
                     return response;
                 })
                 .collect(Collectors.toList());
@@ -144,6 +150,7 @@ public class PreOrderService {
 
         PreOrderResponse response = modelMapper.map(preOrder, PreOrderResponse.class);
         response.setProductName(preOrder.getProduct().getName());
+        response.setImage(preOrder.getProduct().getImage());
         return response;
     }
 }

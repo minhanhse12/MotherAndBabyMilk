@@ -44,205 +44,113 @@ public class OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
-//    @Transactional
-//    public OrderResponse placeOrderFromCart(int userId, String address) {
-//
-//        if (address == null || address.trim().isEmpty()) {
-//            throw new IllegalArgumentException("Address is required");
-//        }
-//
-//        Users user = userRepository.findUsersById(userId);
-//        if (user == null) {
-//            throw new EntityNotFoundException("User not found");
-//        }
-//
-//        Cart cart = cartRepository.findByUserId(userId)
-//                .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
-//
-//        List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
-//                .stream()
-//                .filter(CartItem::isSelect)
-//                .toList();
-//
-//        if (selectedItems.isEmpty()) {
-//            throw new IllegalStateException("No selected items in cart");
-//        }
-//
-//        if ("pending_order".equals(cart.getStatus())) {
-//            throw new IllegalStateException("Cart is already being processed for another order");
-//        }
-//
-//        Order order = new Order();
-//        order.setUser(user);
-//        order.setOrderDate(LocalDateTime.now());
-//        order.setAddress(address.trim());
-//
-//        List<OrderItem> orderItems = new ArrayList<>();
-//        double total = 0;
-//
-//        for (CartItem ci : selectedItems) {
-//            Product product = ci.getProduct();
-//            if (product.getQuantity() < ci.getQuantity()) {
-//                throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
-//            }
-//
-//            OrderItem item = new OrderItem();
-//            item.setOrder(order);
-//            item.setProductId(product);
-//            item.setQuantity(ci.getQuantity());
-//            item.setTotalAmount(ci.getUnitPrice());
-//            orderItems.add(item);
-//
-//            total += ci.getTotalPrice();
-//        }
-//
-//        Date paymentDeadline = new Date(System.currentTimeMillis() + 5 * 60 * 1000);
-//        order.setPaymentDeadline(paymentDeadline);
-//        order.setStatus(OrderStatus.PENDING);
-//        order.setTotalAmount(total);
-//        order.setOrderItems(orderItems);
-//        Order savedOrder = orderRepository.save(order);
-//
-//        cart.setStatus("pending_order");
-//        cart.setLastOrderId(savedOrder.getId());
-//        cart.setUpdatedAt(LocalDateTime.now());
-//        cartRepository.save(cart);
-//
-//        long delayMillis = 5 * 60 * 1000;
-//        scheduler.schedule(() -> {
-//            Optional<Order> optionalOrder = orderRepository.findById(savedOrder.getId());
-//            if (optionalOrder.isPresent()) {
-//                Order o = optionalOrder.get();
-//                if (o.getStatus() == OrderStatus.PENDING &&
-//                        o.getPaymentDeadline() != null &&
-//                        o.getPaymentDeadline().before(new Date())) {
-//
-//                    o.setStatus(OrderStatus.CANCELED);
-//                    orderRepository.save(o);
-//
-//                    Cart timeoutCart = cartRepository.findByUserId(userId).orElse(null);
-//                    if (timeoutCart != null) {
-//                        timeoutCart.setStatus("active");
-//                        timeoutCart.setLastOrderId(0);
-//                        timeoutCart.setUpdatedAt(LocalDateTime.now());
-//                        cartRepository.save(timeoutCart);
-//                    }
-//
-//                    logger.info("Order {} canceled due to payment timeout", o.getId());
-//                }
-//            }
-//        }, delayMillis, TimeUnit.MILLISECONDS);
-//
-//        return convertToOrderResponse(savedOrder);
-//    }
-@Transactional
-public OrderResponse placeOrderFromCart(int userId, String address, boolean useLoyaltyPoints) {
+    @Transactional
+    public OrderResponse placeOrderFromCart(int userId, String address, boolean useLoyaltyPoints) {
 
-    if (address == null || address.trim().isEmpty()) {
-        throw new IllegalArgumentException("Address is required");
-    }
-
-    Users user = userRepository.findUsersById(userId);
-    if (user == null) {
-        throw new EntityNotFoundException("User not found");
-    }
-
-    Cart cart = cartRepository.findByUserId(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
-
-    List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
-            .stream()
-            .filter(CartItem::isSelect)
-            .toList();
-
-    if (selectedItems.isEmpty()) {
-        throw new IllegalStateException("No selected items in cart");
-    }
-
-    if ("pending_order".equals(cart.getStatus())) {
-        throw new IllegalStateException("Cart is already being processed for another order");
-    }
-
-    Order order = new Order();
-    order.setUser(user);
-    order.setOrderDate(LocalDateTime.now());
-    order.setAddress(address.trim());
-
-    List<OrderItem> orderItems = new ArrayList<>();
-    double total = 0;
-
-    for (CartItem ci : selectedItems) {
-        Product product = ci.getProduct();
-        if (product.getQuantity() < ci.getQuantity()) {
-            throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
+        if (address == null || address.trim().isEmpty()) {
+            throw new IllegalArgumentException("Address is required");
         }
 
-        OrderItem item = new OrderItem();
-        item.setOrder(order);
-        item.setProductId(product);
-        item.setQuantity(ci.getQuantity());
-        item.setTotalAmount(ci.getUnitPrice());
-        orderItems.add(item);
+        Users user = userRepository.findUsersById(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
-        total += ci.getTotalPrice();
-    }
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart not found for user ID " + userId));
 
-    double originalTotal = total;
+        List<CartItem> selectedItems = cartItemRepository.findByCartIdAndIsDeleteFalse(cart.getId())
+                .stream()
+                .filter(CartItem::isSelect)
+                .toList();
 
-    int pointsUsed = 0;
-    double discountAmount = 0;
+        if (selectedItems.isEmpty()) {
+            throw new IllegalStateException("No selected items in cart");
+        }
 
-    if (useLoyaltyPoints && user.getLoyaltyPoints() > 0) {
-        pointsUsed = user.getLoyaltyPoints();
-        double maxDiscountPercent = Math.min(pointsUsed, 100); // giới hạn 100%
-        discountAmount = (maxDiscountPercent / 100.0) * total;
-        total -= discountAmount;
+        if ("pending_order".equals(cart.getStatus())) {
+            throw new IllegalStateException("Cart is already being processed for another order");
+        }
 
-        user.setLoyaltyPoints(user.getLoyaltyPoints() - (int) maxDiscountPercent);
-        userRepository.save(user);
-    }
+        Order order = new Order();
+        order.setUser(user);
+        order.setOrderDate(LocalDateTime.now());
+        order.setAddress(address.trim());
 
-    order.setTotalAmount(total);
-    order.setStatus(OrderStatus.PENDING);
-    order.setPaymentDeadline(new Date(System.currentTimeMillis() + 5 * 60 * 1000));
-    order.setOrderItems(orderItems);
+        List<OrderItem> orderItems = new ArrayList<>();
+        double total = 0;
 
-    Order savedOrder = orderRepository.save(order);
-
-
-    cart.setStatus("pending_order");
-    cart.setLastOrderId(savedOrder.getId());
-    cart.setUpdatedAt(LocalDateTime.now());
-    cartRepository.save(cart);
-
-    // Schedule tự hủy nếu quá hạn
-    long delayMillis = 5 * 60 * 1000;
-    scheduler.schedule(() -> {
-        Optional<Order> optionalOrder = orderRepository.findById(savedOrder.getId());
-        if (optionalOrder.isPresent()) {
-            Order o = optionalOrder.get();
-            if (o.getStatus() == OrderStatus.PENDING &&
-                    o.getPaymentDeadline() != null &&
-                    o.getPaymentDeadline().before(new Date())) {
-
-                o.setStatus(OrderStatus.CANCELED);
-                orderRepository.save(o);
-
-                Cart timeoutCart = cartRepository.findByUserId(userId).orElse(null);
-                if (timeoutCart != null) {
-                    timeoutCart.setStatus("active");
-                    timeoutCart.setLastOrderId(0);
-                    timeoutCart.setUpdatedAt(LocalDateTime.now());
-                    cartRepository.save(timeoutCart);
-                }
-
-                logger.info("Order {} canceled due to payment timeout", o.getId());
+        for (CartItem ci : selectedItems) {
+            Product product = ci.getProduct();
+            if (product.getQuantity() < ci.getQuantity()) {
+                throw new IllegalArgumentException("Insufficient stock for product ID " + product.getId());
             }
-        }
-    }, delayMillis, TimeUnit.MILLISECONDS);
 
-    return convertToOrderResponse(savedOrder);
-}
+            OrderItem item = new OrderItem();
+            item.setOrder(order);
+            item.setProductId(product);
+            item.setQuantity(ci.getQuantity());
+            item.setTotalAmount(ci.getUnitPrice());
+            orderItems.add(item);
+
+            total += ci.getTotalPrice();
+        }
+
+        double originalTotal = total;
+
+        int pointsUsed = 0;
+        double discountAmount = 0;
+
+        if (useLoyaltyPoints && user.getLoyaltyPoints() > 0) {
+            pointsUsed = user.getLoyaltyPoints();
+            double maxDiscountPercent = Math.min(pointsUsed, 100); // giới hạn 100%
+            discountAmount = (maxDiscountPercent / 100.0) * total;
+            total -= discountAmount;
+
+            user.setLoyaltyPoints(user.getLoyaltyPoints() - (int) maxDiscountPercent);
+            userRepository.save(user);
+        }
+
+        order.setTotalAmount(total);
+        order.setStatus(OrderStatus.PENDING);
+        order.setPaymentDeadline(new Date(System.currentTimeMillis() + 5 * 60 * 1000));
+        order.setOrderItems(orderItems);
+
+        Order savedOrder = orderRepository.save(order);
+
+
+        cart.setStatus("pending_order");
+        cart.setLastOrderId(savedOrder.getId());
+        cart.setUpdatedAt(LocalDateTime.now());
+        cartRepository.save(cart);
+
+        long delayMillis = 5 * 60 * 1000;
+        scheduler.schedule(() -> {
+            Optional<Order> optionalOrder = orderRepository.findById(savedOrder.getId());
+            if (optionalOrder.isPresent()) {
+                Order o = optionalOrder.get();
+                if (o.getStatus() == OrderStatus.PENDING &&
+                        o.getPaymentDeadline() != null &&
+                        o.getPaymentDeadline().before(new Date())) {
+
+                    o.setStatus(OrderStatus.CANCELED);
+                    orderRepository.save(o);
+
+                    Cart timeoutCart = cartRepository.findByUserId(userId).orElse(null);
+                    if (timeoutCart != null) {
+                        timeoutCart.setStatus("active");
+                        timeoutCart.setLastOrderId(0);
+                        timeoutCart.setUpdatedAt(LocalDateTime.now());
+                        cartRepository.save(timeoutCart);
+                    }
+
+                    logger.info("Order {} canceled due to payment timeout", o.getId());
+                }
+            }
+        }, delayMillis, TimeUnit.MILLISECONDS);
+
+        return convertToOrderResponse(savedOrder);
+    }
 
 
     @Transactional
@@ -260,7 +168,6 @@ public OrderResponse placeOrderFromCart(int userId, String address, boolean useL
             throw new EntityNotFoundException("User not found with ID: " + userId);
         }
 
-        // Lấy danh sách orders theo userId
         List<Order> orders = orderRepository.findByUserIdAndIsDeleteFalse(userId);
 
         return orders.stream()

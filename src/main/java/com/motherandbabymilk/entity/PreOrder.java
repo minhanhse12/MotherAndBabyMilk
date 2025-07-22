@@ -21,8 +21,16 @@ public class PreOrder {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(name = "unit_price", nullable = false)
+    private double unitPrice;
+
+    @Column(name = "total_price", nullable = false)
+    private double totalAmount;
+
     @Column(nullable = false)
     private int quantity;
+
+
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -39,4 +47,9 @@ public class PreOrder {
 
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
+
+    @PrePersist
+    public void calculateTotalPrice() {
+        this.totalAmount = this.unitPrice * this.quantity;
+    }
 }
