@@ -39,7 +39,6 @@ public class CartController {
         Users user = userService.getCurrentAccount();
         CartOperationResponse response = cartService.addToCart(user.getId(), request);
         if (!response.isSuccess() && response.getMessage().contains("Insufficient stock")) {
-            // Gợi ý đặt trước nếu sản phẩm hết hàng
             response.setMessage(response.getMessage() + ". This product is out of stock. Consider placing a pre-order.");
         }
         return ResponseEntity.ok(response);

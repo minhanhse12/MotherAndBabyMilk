@@ -34,9 +34,8 @@ public class FeedbackService {
     @Autowired
     private UserRepository userRepository;
 
-    // Tạo feedback mới
+
     public FeedbackResponse createFeedback(FeedbackRequest requestDTO) {
-        // Kiểm tra xem user đã feedback cho product này chưa
         Optional<Feedback> existingFeedback = feedbackRepository
                 .findByUserIdAndProductId(requestDTO.getUserId(), requestDTO.getProductId());
 
@@ -82,7 +81,6 @@ public class FeedbackService {
                 .toList();
     }
 
-    // Lấy feedback theo product ID
     @Transactional(readOnly = true)
     public List<FeedbackResponse> getFeedbacksByProductId(int productId) {
         List<Feedback> feedbacks = feedbackRepository.findByProductId(productId);
@@ -91,7 +89,6 @@ public class FeedbackService {
                 .toList();
     }
 
-    // Lấy feedback đã được approve theo product ID
     @Transactional(readOnly = true)
     public List<FeedbackResponse> getApprovedFeedbacksByProductId(int productId) {
         List<Feedback> feedbacks = feedbackRepository.findByProductIdAndIsApproved(productId, true);
@@ -100,7 +97,6 @@ public class FeedbackService {
                 .toList();
     }
 
-    // Lấy feedback chưa được approve
     @Transactional(readOnly = true)
     public List<FeedbackResponse> getPendingFeedbacks() {
         List<Feedback> feedbacks = feedbackRepository.findByIsApprovedFalse();
@@ -109,12 +105,10 @@ public class FeedbackService {
                 .toList();
     }
 
-    // Cập nhật feedback
     public FeedbackResponse updateFeedback(int id, FeedbackUpdate updateDTO) {
         Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Feedback not found with id: " + id));
 
-        // Cập nhật các trường nếu có giá trị mới
         if (updateDTO.getRating() != null) {
             feedback.setRating(updateDTO.getRating());
         }
@@ -129,7 +123,6 @@ public class FeedbackService {
         return mapToResponseDTO(updatedFeedback);
     }
 
-    // Approve feedback
     public FeedbackResponse approveFeedback(int id) {
         Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Feedback not found with id: " + id));
@@ -139,7 +132,6 @@ public class FeedbackService {
         return mapToResponseDTO(updatedFeedback);
     }
 
-    // Reject feedback
     public FeedbackResponse rejectFeedback(int id) {
         Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Feedback not found with id: " + id));
@@ -149,7 +141,6 @@ public class FeedbackService {
         return mapToResponseDTO(updatedFeedback);
     }
 
-    // Xóa feedback
     public void deleteFeedback(int id) {
         if (!feedbackRepository.existsById(id)) {
             throw new ResourceNotFoundException("Feedback not found with id: " + id);
@@ -157,13 +148,11 @@ public class FeedbackService {
         feedbackRepository.deleteById(id);
     }
 
-    // Lấy rating trung bình của product
     @Transactional(readOnly = true)
     public Double getAverageRatingByProductId(int productId) {
         return feedbackRepository.findAverageRatingByProductId(productId);
     }
 
-    // Helper method để convert entity sang DTO
     private FeedbackResponse mapToResponseDTO(Feedback feedback) {
         FeedbackResponse dto = new FeedbackResponse();
         dto.setId(feedback.getId());

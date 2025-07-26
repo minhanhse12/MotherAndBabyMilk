@@ -75,7 +75,6 @@ public class UserService implements UserDetailsService {
 
             Users newUser = this.userRepository.save(user);
 
-            // Gửi email chào mừng
             EmailDetail emailDetail = new EmailDetail();
             emailDetail.setReceiver(newUser);
             emailDetail.setSubject("Welcome to MnBMilk");
