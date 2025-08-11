@@ -37,9 +37,9 @@ public class Order {
     @Column(name = "vnpay_txn_ref")
     private String vnpayTxnRef;
 
+    @Column(name = "status", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private OrderStatus status = OrderStatus.PENDING;
+    private OrderStatus status;
 
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete = false;
